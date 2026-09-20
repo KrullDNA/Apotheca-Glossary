@@ -39,6 +39,55 @@ define( 'APGLOS_BASENAME', plugin_basename( __FILE__ ) );
 define( 'APGLOS_POST_TYPE', 'apglos_term' );
 define( 'APGLOS_TAXONOMY', 'apglos_category' );
 
+// The single option key all plugin settings live under.
+define( 'APGLOS_SETTINGS_OPTION', 'apglos_settings' );
+
+/*
+ * -----------------------------------------------------------------------------
+ * Settings helpers
+ * -----------------------------------------------------------------------------
+ * One option array holds every setting, with these defaults. The Stage 6
+ * settings page writes to the same option; linkify and schema read it here.
+ * Linkify ships switched off, per the brief.
+ */
+
+/**
+ * The default settings.
+ *
+ * @return array
+ */
+function apglos_default_settings() {
+	return array(
+		'linkify_enabled'             => false, // Ships off. Turn on once populated.
+		'linkify_cap'                 => 3,     // Max links per post.
+		'linkify_new_tab'             => true,  // Open links in a new tab.
+		'linkify_new_tab_note'        => true,  // Hidden "opens in a new tab" note.
+		'linkify_external_icon'       => false, // Optional external-link icon.
+		'linkify_excluded_post_types' => array(), // Global post type exclusions.
+		'glossary_slug'               => 'glossary',
+	);
+}
+
+/**
+ * Get all settings, merged over the defaults.
+ *
+ * @return array
+ */
+function apglos_get_settings() {
+	return wp_parse_args( get_option( APGLOS_SETTINGS_OPTION, array() ), apglos_default_settings() );
+}
+
+/**
+ * Get one setting by key.
+ *
+ * @param string $key The setting key.
+ * @return mixed
+ */
+function apglos_get_setting( $key ) {
+	$settings = apglos_get_settings();
+	return array_key_exists( $key, $settings ) ? $settings[ $key ] : null;
+}
+
 /*
  * -----------------------------------------------------------------------------
  * Includes
@@ -52,6 +101,8 @@ require_once APGLOS_PATH . 'includes/class-meta.php';
 require_once APGLOS_PATH . 'includes/class-importer.php';
 require_once APGLOS_PATH . 'includes/class-renderer.php';
 require_once APGLOS_PATH . 'includes/class-shortcode.php';
+require_once APGLOS_PATH . 'includes/class-linkify.php';
+require_once APGLOS_PATH . 'includes/class-schema.php';
 require_once APGLOS_PATH . 'elementor/class-elementor-loader.php';
 
 /*
@@ -87,6 +138,14 @@ function apglos_init() {
 	// The [apotheca_glossary] shortcode and its shared front-end assets.
 	$shortcode = new Apglos_Shortcode();
 	$shortcode->init();
+
+	// Automatic in-content linking of glossary terms. Ships switched off.
+	$linkify = new Apglos_Linkify();
+	$linkify->init();
+
+	// DefinedTerm / DefinedTermSet schema and canonical handling.
+	$schema = new Apglos_Schema();
+	$schema->init();
 
 	// The Elementor widget. Its methods hang off Elementor's own hooks, so on a
 	// site without Elementor nothing here fires.
