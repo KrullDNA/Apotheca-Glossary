@@ -50,6 +50,8 @@ define( 'APGLOS_TAXONOMY', 'apglos_category' );
 require_once APGLOS_PATH . 'includes/class-post-type.php';
 require_once APGLOS_PATH . 'includes/class-meta.php';
 require_once APGLOS_PATH . 'includes/class-importer.php';
+require_once APGLOS_PATH . 'includes/class-renderer.php';
+require_once APGLOS_PATH . 'includes/class-shortcode.php';
 
 /*
  * -----------------------------------------------------------------------------
@@ -80,6 +82,10 @@ function apglos_init() {
 	// The CSV importer / exporter admin page under the Glossary menu.
 	$importer = new Apglos_Importer();
 	$importer->init();
+
+	// The [apotheca_glossary] shortcode and its shared front-end assets.
+	$shortcode = new Apglos_Shortcode();
+	$shortcode->init();
 }
 add_action( 'plugins_loaded', 'apglos_init' );
 
