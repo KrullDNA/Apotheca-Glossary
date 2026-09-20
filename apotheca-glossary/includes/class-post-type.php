@@ -49,6 +49,10 @@ class Apglos_Post_Type {
 		add_action( 'init', array( $this, 'register_post_type' ) );
 		add_action( 'init', array( $this, 'register_taxonomy' ) );
 
+		// After registration, flush rewrite rules once if the slug just changed
+		// on the settings page.
+		add_action( 'init', array( $this, 'maybe_flush' ), 99 );
+
 		// Add and populate the admin columns on the term list screen.
 		add_filter( 'manage_' . APGLOS_POST_TYPE . '_posts_columns', array( $this, 'set_admin_columns' ) );
 		add_action( 'manage_' . APGLOS_POST_TYPE . '_posts_custom_column', array( $this, 'render_admin_column' ), 10, 2 );
@@ -74,6 +78,13 @@ class Apglos_Post_Type {
 	 * @return void
 	 */
 	public function register_post_type() {
+		// The URL base, configurable on the settings page, defaulting to
+		// "glossary".
+		$slug = function_exists( 'apglos_get_setting' ) ? sanitize_title( (string) apglos_get_setting( 'glossary_slug' ) ) : 'glossary';
+		if ( '' === $slug ) {
+			$slug = 'glossary';
+		}
+
 		$labels = array(
 			'name'                  => _x( 'Glossary Terms', 'Post type general name', 'apotheca-glossary' ),
 			'singular_name'         => _x( 'Glossary Term', 'Post type singular name', 'apotheca-glossary' ),
@@ -97,8 +108,8 @@ class Apglos_Post_Type {
 		$args = array(
 			'labels'             => $labels,
 			'public'             => true,
-			// The archive lives at /glossary/, matching the rewrite slug below.
-			'has_archive'        => 'glossary',
+			// The archive lives at the configured slug, matching the rewrite.
+			'has_archive'        => $slug,
 			// The term editor: title (the term) and content (the definition).
 			'supports'           => array( 'title', 'editor', 'revisions', 'page-attributes' ),
 			'menu_icon'          => 'dashicons-book-alt',
@@ -107,7 +118,7 @@ class Apglos_Post_Type {
 			'menu_position'      => 25,
 			'show_in_rest'       => true,
 			'rewrite'            => array(
-				'slug'       => 'glossary',
+				'slug'       => $slug,
 				'with_front' => false,
 			),
 			// Link the category taxonomy at registration too, so it appears on
@@ -170,6 +181,22 @@ class Apglos_Post_Type {
 			if ( ! term_exists( $category_name, APGLOS_TAXONOMY ) ) {
 				wp_insert_term( $category_name, APGLOS_TAXONOMY );
 			}
+		}
+	}
+
+	/**
+	 * Flush rewrite rules once, if the settings page flagged a slug change.
+	 *
+	 * Runs after the post type is registered with its new slug, so the new
+	 * /slug/ URLs resolve straight away without the admin needing to visit the
+	 * Permalinks screen.
+	 *
+	 * @return void
+	 */
+	public function maybe_flush() {
+		if ( get_option( 'apglos_needs_flush' ) ) {
+			flush_rewrite_rules();
+			delete_option( 'apglos_needs_flush' );
 		}
 	}
 

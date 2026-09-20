@@ -230,6 +230,27 @@
 	100% { background: transparent; }
 }
 
+/* Visible focus states for keyboard users, on every interactive element.
+   Uses :focus-visible so a mouse click does not leave a lingering ring, with a
+   :focus fallback for older browsers. */
+.apglos__letter:focus-visible,
+.apglos__clear:focus-visible,
+.apglos__cat-label:focus-visible,
+.apglos__related-link:focus-visible,
+.apglos__search:focus-visible,
+.apglos__category:focus-visible {
+	outline: 2px solid #2b333f;
+	outline-offset: 2px;
+}
+
+.apglos__letter:focus,
+.apglos__clear:focus,
+.apglos__cat-label:focus,
+.apglos__related-link:focus {
+	outline: 2px solid #2b333f;
+	outline-offset: 2px;
+}
+
 /* Search highlight */
 mark.apglos-mark {
 	background: #ffe680;

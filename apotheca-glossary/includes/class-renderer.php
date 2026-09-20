@@ -398,7 +398,7 @@ class Apglos_Renderer {
 				<div class="apglos__controls">
 
 					<?php if ( $settings['show_search'] ) : ?>
-						<div class="apglos__search-wrap">
+						<div class="apglos__search-wrap" role="search">
 							<label class="screen-reader-text" for="<?php echo esc_attr( $instance_id ); ?>-search">
 								<?php echo esc_html( $settings['search_placeholder'] ); ?>
 							</label>
@@ -456,7 +456,7 @@ class Apglos_Renderer {
 					number_format_i18n( $total )
 				);
 				?>
-				<p class="apglos__count" data-apglos-count aria-live="polite">
+				<p class="apglos__count" data-apglos-count role="status" aria-live="polite" aria-atomic="true">
 					<?php echo esc_html( $count_text ); ?>
 				</p>
 			<?php endif; ?>

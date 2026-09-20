@@ -143,6 +143,36 @@
 		var state = { q: '', letter: '', cat: '' };
 
 		/**
+		 * The enabled (non-empty) letter buttons, in document order.
+		 */
+		function enabledButtons() {
+			var list = [];
+			for ( var i = 0; i < letterButtons.length; i++ ) {
+				if ( ! letterButtons[ i ].disabled ) {
+					list.push( letterButtons[ i ] );
+				}
+			}
+			return list;
+		}
+
+		/**
+		 * The first enabled letter button, or null.
+		 */
+		function firstEnabledButton() {
+			var enabled = enabledButtons();
+			return enabled.length ? enabled[ 0 ] : null;
+		}
+
+		/**
+		 * Roving tabindex: put exactly one letter button in the tab order.
+		 */
+		function setRoving( target ) {
+			for ( var i = 0; i < letterButtons.length; i++ ) {
+				letterButtons[ i ].tabIndex = ( letterButtons[ i ] === target ) ? 0 : -1;
+			}
+		}
+
+		/**
 		 * Decide whether one entry passes all active filters.
 		 */
 		function entryMatches( entry ) {
@@ -213,12 +243,20 @@
 				emptyEl.hidden = shown !== 0;
 			}
 
-			// Letter bar active state.
+			// Letter bar active state, and keep the tab stop on the active
+			// letter so keyboard users land on the current selection.
+			var activeButton = null;
 			for ( var b = 0; b < letterButtons.length; b++ ) {
 				var btn = letterButtons[ b ];
 				var isActive = state.letter && btn.getAttribute( 'data-letter' ) === state.letter;
 				btn.classList.toggle( 'is-active', !! isActive );
 				btn.setAttribute( 'aria-pressed', isActive ? 'true' : 'false' );
+				if ( isActive ) {
+					activeButton = btn;
+				}
+			}
+			if ( activeButton ) {
+				setRoving( activeButton );
 			}
 
 			// Show Clear all only when at least one filter is active.
@@ -319,7 +357,7 @@
 			} );
 		}
 
-		// Letter bar.
+		// Letter bar clicks.
 		for ( var b = 0; b < letterButtons.length; b++ ) {
 			( function ( button ) {
 				if ( button.disabled ) {
@@ -329,9 +367,54 @@
 					var letter = button.getAttribute( 'data-letter' );
 					// Clicking the active letter clears it (a toggle).
 					state.letter = ( state.letter === letter ) ? '' : letter;
+					setRoving( button );
 					apply();
 				} );
 			} )( letterButtons[ b ] );
+		}
+
+		// Letter bar keyboard navigation (a toolbar pattern): one tab stop for
+		// the whole bar, then arrow keys move between the enabled letters, with
+		// Home and End jumping to the ends.
+		var azContainer = root.querySelector( '[data-apglos-az]' );
+		if ( azContainer && letterButtons.length ) {
+			// Roving tabindex: only one button is in the tab order at a time.
+			setRoving( firstEnabledButton() );
+
+			azContainer.addEventListener( 'keydown', function ( e ) {
+				var handled = [ 'ArrowRight', 'ArrowLeft', 'ArrowUp', 'ArrowDown', 'Home', 'End' ];
+				if ( handled.indexOf( e.key ) < 0 ) {
+					return;
+				}
+				var enabled = enabledButtons();
+				if ( ! enabled.length ) {
+					return;
+				}
+				var idx = enabled.indexOf( document.activeElement );
+				if ( idx < 0 ) {
+					idx = 0;
+				}
+				var next = idx;
+				if ( 'ArrowRight' === e.key || 'ArrowDown' === e.key ) {
+					next = idx + 1;
+				} else if ( 'ArrowLeft' === e.key || 'ArrowUp' === e.key ) {
+					next = idx - 1;
+				} else if ( 'Home' === e.key ) {
+					next = 0;
+				} else if ( 'End' === e.key ) {
+					next = enabled.length - 1;
+				}
+				// Wrap around the ends.
+				if ( next < 0 ) {
+					next = enabled.length - 1;
+				}
+				if ( next >= enabled.length ) {
+					next = 0;
+				}
+				setRoving( enabled[ next ] );
+				enabled[ next ].focus();
+				e.preventDefault();
+			} );
 		}
 
 		// Category dropdown.

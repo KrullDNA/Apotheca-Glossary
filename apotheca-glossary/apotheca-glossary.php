@@ -103,6 +103,7 @@ require_once APGLOS_PATH . 'includes/class-renderer.php';
 require_once APGLOS_PATH . 'includes/class-shortcode.php';
 require_once APGLOS_PATH . 'includes/class-linkify.php';
 require_once APGLOS_PATH . 'includes/class-schema.php';
+require_once APGLOS_PATH . 'includes/class-settings.php';
 require_once APGLOS_PATH . 'elementor/class-elementor-loader.php';
 
 /*
@@ -146,6 +147,10 @@ function apglos_init() {
 	// DefinedTerm / DefinedTermSet schema and canonical handling.
 	$schema = new Apglos_Schema();
 	$schema->init();
+
+	// The settings page under the Glossary menu.
+	$settings = new Apglos_Settings();
+	$settings->init();
 
 	// The Elementor widget. Its methods hang off Elementor's own hooks, so on a
 	// site without Elementor nothing here fires.
