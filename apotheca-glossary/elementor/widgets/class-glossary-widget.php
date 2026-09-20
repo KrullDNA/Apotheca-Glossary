@@ -347,6 +347,24 @@ class Apglos_Glossary_Widget extends Widget_Base {
 			)
 		);
 
+		// Anchor scroll offset: how far below the top a related-term jump lands,
+		// so a fixed or transparent header does not cover the term. Per device,
+		// since header height often differs on mobile.
+		$this->add_responsive_control(
+			'anchor_offset',
+			array(
+				'label'          => __( 'Anchor offset', 'apotheca-glossary' ),
+				'type'           => Controls_Manager::SLIDER,
+				'size_units'     => array( 'px', 'rem', 'em' ),
+				'range'          => array( 'px' => array( 'min' => 0, 'max' => 400 ) ),
+				'default'        => array( 'unit' => 'px', 'size' => 100 ),
+				'selectors'      => array(
+					'{{WRAPPER}}' => '--apglos-anchor-offset: {{SIZE}}{{UNIT}};',
+				),
+				'description'    => __( 'How far below the top a jump to a related term lands, so a fixed or transparent header does not cover it. Set it per device.', 'apotheca-glossary' ),
+			)
+		);
+
 		$this->end_controls_section();
 	}
 
@@ -834,28 +852,89 @@ class Apglos_Glossary_Widget extends Widget_Base {
 			)
 		);
 
+		// Text and background across Normal and Hover, so the Clear all control
+		// can be a plain link or a full button. The !important on backgrounds
+		// keeps them from being overridden by a theme's own button styling.
+		$this->start_controls_tabs( 'clear_state_tabs' );
+
+		$this->start_controls_tab( 'clear_normal', array( 'label' => __( 'Normal', 'apotheca-glossary' ) ) );
 		$this->add_control(
 			'clear_color',
 			array(
-				'label'     => __( 'Colour', 'apotheca-glossary' ),
+				'label'     => __( 'Text colour', 'apotheca-glossary' ),
 				'type'      => Controls_Manager::COLOR,
 				'selectors' => array( '{{WRAPPER}} .apglos__clear' => 'color: {{VALUE}};' ),
 			)
 		);
+		$this->add_control(
+			'clear_bg',
+			array(
+				'label'     => __( 'Background', 'apotheca-glossary' ),
+				'type'      => Controls_Manager::COLOR,
+				'selectors' => array( '{{WRAPPER}} .apglos__clear' => 'background-color: {{VALUE}} !important;' ),
+			)
+		);
+		$this->end_controls_tab();
 
+		$this->start_controls_tab( 'clear_hover', array( 'label' => __( 'Hover', 'apotheca-glossary' ) ) );
 		$this->add_control(
 			'clear_hover_color',
 			array(
-				'label'     => __( 'Hover colour', 'apotheca-glossary' ),
+				'label'     => __( 'Text colour', 'apotheca-glossary' ),
 				'type'      => Controls_Manager::COLOR,
-				'selectors' => array( '{{WRAPPER}} .apglos__clear:hover' => 'color: {{VALUE}};' ),
+				'selectors' => array( '{{WRAPPER}} .apglos__clear:hover, {{WRAPPER}} .apglos__clear:focus' => 'color: {{VALUE}};' ),
+			)
+		);
+		$this->add_control(
+			'clear_hover_bg',
+			array(
+				'label'     => __( 'Background', 'apotheca-glossary' ),
+				'type'      => Controls_Manager::COLOR,
+				'selectors' => array( '{{WRAPPER}} .apglos__clear:hover, {{WRAPPER}} .apglos__clear:focus' => 'background-color: {{VALUE}} !important;' ),
+			)
+		);
+		$this->end_controls_tab();
+
+		$this->end_controls_tabs();
+
+		// Border, radius and padding so it can be shaped into a button.
+		$this->add_group_control(
+			Group_Control_Border::get_type(),
+			array(
+				'name'      => 'clear_border',
+				'selector'  => '{{WRAPPER}} .apglos__clear',
+				'separator' => 'before',
+			)
+		);
+
+		$this->add_responsive_control(
+			'clear_radius',
+			array(
+				'label'      => __( 'Border radius', 'apotheca-glossary' ),
+				'type'       => Controls_Manager::DIMENSIONS,
+				'size_units' => array( 'px', '%' ),
+				'selectors'  => array(
+					'{{WRAPPER}} .apglos__clear' => 'border-radius: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
+				),
+			)
+		);
+
+		$this->add_responsive_control(
+			'clear_padding',
+			array(
+				'label'      => __( 'Padding', 'apotheca-glossary' ),
+				'type'       => Controls_Manager::DIMENSIONS,
+				'size_units' => array( 'px', 'em', 'rem' ),
+				'selectors'  => array(
+					'{{WRAPPER}} .apglos__clear' => 'padding: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
+				),
 			)
 		);
 
 		$this->add_responsive_control(
 			'clear_spacing',
 			array(
-				'label'      => __( 'Spacing', 'apotheca-glossary' ),
+				'label'      => __( 'Spacing (margin)', 'apotheca-glossary' ),
 				'type'       => Controls_Manager::DIMENSIONS,
 				'size_units' => array( 'px', 'em', 'rem' ),
 				'selectors'  => array(
@@ -1478,12 +1557,15 @@ class Apglos_Glossary_Widget extends Widget_Base {
 			)
 		);
 
+		// These set custom properties on the wrapper. The plugin's static CSS
+		// reads them with !important, so the chosen colours win over a theme
+		// that styles the bare <mark> element, without hardcoding anything.
 		$this->add_control(
 			'highlight_bg',
 			array(
 				'label'     => __( 'Highlight background', 'apotheca-glossary' ),
 				'type'      => Controls_Manager::COLOR,
-				'selectors' => array( '{{WRAPPER}} mark.apglos-mark' => 'background-color: {{VALUE}};' ),
+				'selectors' => array( '{{WRAPPER}}' => '--apglos-hl-bg: {{VALUE}};' ),
 			)
 		);
 
@@ -1492,7 +1574,7 @@ class Apglos_Glossary_Widget extends Widget_Base {
 			array(
 				'label'     => __( 'Highlight text colour', 'apotheca-glossary' ),
 				'type'      => Controls_Manager::COLOR,
-				'selectors' => array( '{{WRAPPER}} mark.apglos-mark' => 'color: {{VALUE}};' ),
+				'selectors' => array( '{{WRAPPER}}' => '--apglos-hl-color: {{VALUE}};' ),
 			)
 		);
 

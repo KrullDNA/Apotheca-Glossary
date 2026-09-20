@@ -15,6 +15,10 @@
 		showingOne: 'Showing %1$s of %2$s term'
 	};
 
+	// The search only starts filtering and highlighting once this many
+	// characters have been typed. Fewer than this is treated as no search.
+	var MIN_SEARCH = 3;
+
 	// Only the first instance on a page claims the URL, so instances never
 	// fight over the query string.
 	var urlClaimed = false;
@@ -243,6 +247,13 @@
 				emptyEl.hidden = shown !== 0;
 			}
 
+			// With a single result, drop to one column so the heading and its
+			// entry stay together on the left instead of splitting across two.
+			var listEl = root.querySelector( '[data-apglos-list]' );
+			if ( listEl ) {
+				listEl.classList.toggle( 'apglos-list--single', shown === 1 );
+			}
+
 			// Letter bar active state, and keep the tab stop on the active
 			// letter so keyboard users land on the current selection.
 			var activeButton = null;
@@ -315,10 +326,12 @@
 			var cat = params.get( 'cat' );
 
 			if ( q ) {
-				state.q = q;
+				// Prefill the box, but only treat it as an active search once it
+				// meets the minimum length.
 				if ( searchInput ) {
 					searchInput.value = q;
 				}
+				state.q = ( q.trim().length >= MIN_SEARCH ) ? q.trim() : '';
 			}
 			if ( letter ) {
 				// Only accept a letter the bar actually offers.
@@ -351,7 +364,9 @@
 					window.clearTimeout( searchTimer );
 				}
 				searchTimer = window.setTimeout( function () {
-					state.q = searchInput.value.trim();
+					var raw = searchInput.value.trim();
+					// Only search once at least MIN_SEARCH characters are typed.
+					state.q = ( raw.length >= MIN_SEARCH ) ? raw : '';
 					apply();
 				}, 120 );
 			} );
