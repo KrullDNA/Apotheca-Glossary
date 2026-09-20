@@ -3,7 +3,7 @@ Contributors: krulldna
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.0.2
+Stable tag: 1.0.3
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -91,6 +91,9 @@ Attributes (all optional): `show_search`, `show_az_bar`, `show_09`, `show_catego
 * The search field sits in a search landmark, the letter bar is a labelled group, and the letter headings give the page a proper heading structure.
 
 == Changelog ==
+
+= 1.0.3 =
+* Hardened the search highlight so it is never painted as a solid black box by a theme or Elementor global style that sets the bare mark element to a dark background with !important. The default highlight now always shows, and the widget's own highlight colours still override it.
 
 = 1.0.2 =
 * The search now only starts filtering and highlighting once at least three characters have been typed.
