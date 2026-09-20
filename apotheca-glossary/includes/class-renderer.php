@@ -62,6 +62,10 @@ class Apglos_Renderer {
 			'related_label'       => __( 'Related:', 'apotheca-glossary' ),
 			'clear_label'         => __( 'Clear all', 'apotheca-glossary' ),
 			'empty_message'       => __( 'No terms match your search.', 'apotheca-glossary' ),
+			// Editor-only preview state: '' (default), 'searching' or 'no_results'.
+			// The widget only ever sets this inside the Elementor editor; it is
+			// never passed on the front end.
+			'preview_state'       => '',
 		);
 	}
 
@@ -290,6 +294,36 @@ class Apglos_Renderer {
 		return function_exists( 'mb_strtolower' ) ? mb_strtolower( $value ) : strtolower( $value );
 	}
 
+	/**
+	 * Wrap the first case-insensitive match of a query in a plain-text string
+	 * with a highlight mark, returning safe HTML. Used only by the editor
+	 * "searching" preview, so the front end never runs it.
+	 *
+	 * @param string $text  The plain text.
+	 * @param string $query The substring to highlight.
+	 * @return string
+	 */
+	private static function highlight_plain( $text, $query ) {
+		$text = (string) $text;
+		if ( '' === $query ) {
+			return wptexturize( esc_html( $text ) );
+		}
+
+		$pos = stripos( $text, $query );
+		if ( false === $pos ) {
+			return wptexturize( esc_html( $text ) );
+		}
+
+		$len    = strlen( $query );
+		$before = substr( $text, 0, $pos );
+		$match  = substr( $text, $pos, $len );
+		$after  = substr( $text, $pos + $len );
+
+		return wptexturize( esc_html( $before ) )
+			. '<mark class="apglos-mark">' . wptexturize( esc_html( $match ) ) . '</mark>'
+			. wptexturize( esc_html( $after ) );
+	}
+
 	/*
 	 * -------------------------------------------------------------------------
 	 * Render
@@ -321,13 +355,35 @@ class Apglos_Renderer {
 		++self::$instance;
 		$instance_id = 'apglos-' . self::$instance;
 
+		// Editor-only preview state. The JavaScript skips any instance carrying
+		// data-apglos-preview, so these mocks never move on the front end.
+		$preview = in_array( $settings['preview_state'], array( 'searching', 'no_results' ), true ) ? $settings['preview_state'] : '';
+
+		// A sample query for the "searching" mock, and the buckets its first few
+		// results belong to (so the right letter headings stay visible).
+		$preview_search  = '';
+		$preview_visible = array();
+		$preview_shown   = min( 3, $total );
+		if ( 'searching' === $preview && $total > 0 ) {
+			$first_title    = $entries[0]['title'];
+			$preview_search = function_exists( 'mb_substr' ) ? mb_substr( $first_title, 0, 3 ) : substr( $first_title, 0, 3 );
+			for ( $p = 0; $p < $preview_shown; $p++ ) {
+				$preview_visible[ $entries[ $p ]['bucket'] ] = true;
+			}
+		} elseif ( 'no_results' === $preview ) {
+			$preview_search = 'qzxwy';
+		}
+
 		// Data attributes carrying per-instance config the JavaScript reads.
 		$wrapper_data = array(
-			'data-apglos'          => '1',
-			'data-instance'        => $instance_id,
-			'data-empty-letters'   => 'hide' === $settings['empty_letters'] ? 'hide' : 'grey',
-			'data-total'           => (string) $total,
+			'data-apglos'        => '1',
+			'data-instance'      => $instance_id,
+			'data-empty-letters' => 'hide' === $settings['empty_letters'] ? 'hide' : 'grey',
+			'data-total'         => (string) $total,
 		);
+		if ( $preview ) {
+			$wrapper_data['data-apglos-preview'] = $preview;
+		}
 
 		ob_start();
 		?>
@@ -352,6 +408,7 @@ class Apglos_Renderer {
 								class="apglos__search"
 								data-apglos-search
 								placeholder="<?php echo esc_attr( $settings['search_placeholder'] ); ?>"
+								value="<?php echo esc_attr( $preview_search ); ?>"
 								autocomplete="off"
 							/>
 						</div>
@@ -375,44 +432,64 @@ class Apglos_Renderer {
 						<?php echo self::render_az_bar( $present, $settings ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped within the method. ?>
 					<?php endif; ?>
 
-					<button type="button" class="apglos__clear" data-apglos-clear hidden>
+					<button type="button" class="apglos__clear" data-apglos-clear <?php echo $preview ? '' : 'hidden'; ?>>
 						<?php echo esc_html( $settings['clear_label'] ); ?>
 					</button>
 				</div>
 			<?php endif; ?>
 
 			<?php if ( $settings['show_count'] ) : ?>
+				<?php
+				// The visible count: the total by default, or the mocked number in
+				// an editor preview state.
+				if ( 'no_results' === $preview ) {
+					$shown = 0;
+				} elseif ( 'searching' === $preview ) {
+					$shown = $preview_shown;
+				} else {
+					$shown = $total;
+				}
+				$count_text = sprintf(
+					/* translators: 1: visible count, 2: total count */
+					_n( 'Showing %1$s of %2$s term', 'Showing %1$s of %2$s terms', $total, 'apotheca-glossary' ),
+					number_format_i18n( $shown ),
+					number_format_i18n( $total )
+				);
+				?>
 				<p class="apglos__count" data-apglos-count aria-live="polite">
-					<?php
-					printf(
-						/* translators: 1: visible count, 2: total count */
-						esc_html( _n( 'Showing %1$s of %2$s term', 'Showing %1$s of %2$s terms', $total, 'apotheca-glossary' ) ),
-						esc_html( number_format_i18n( $total ) ),
-						esc_html( number_format_i18n( $total ) )
-					);
-					?>
+					<?php echo esc_html( $count_text ); ?>
 				</p>
 			<?php endif; ?>
 
 			<div class="apglos__list" data-apglos-list>
 				<?php
 				$current_bucket = null;
+				$row_index      = 0;
 				foreach ( $entries as $entry ) :
-					// Emit a letter heading when the bucket changes.
+					// In the "searching" mock, only the first few rows stay
+					// visible and the first one gets a highlighted match; in the
+					// "no results" mock every row is hidden (via CSS).
+					$force_hidden = ( 'searching' === $preview && $row_index >= $preview_shown );
+					$mark_query   = ( 'searching' === $preview && 0 === $row_index ) ? $preview_search : '';
+
+					// Emit a letter heading when the bucket changes. In the
+					// "searching" mock, hide headings whose group is not shown.
 					if ( $settings['show_headings'] && $entry['bucket'] !== $current_bucket ) :
 						$current_bucket = $entry['bucket'];
+						$heading_hidden = ( 'searching' === $preview && empty( $preview_visible[ $entry['bucket'] ] ) );
 						?>
-						<h2 class="apglos__heading" data-apglos-heading data-letter="<?php echo esc_attr( $entry['bucket'] ); ?>">
+						<h2 class="apglos__heading" data-apglos-heading data-letter="<?php echo esc_attr( $entry['bucket'] ); ?>" <?php echo $heading_hidden ? 'hidden' : ''; ?>>
 							<?php echo esc_html( $entry['bucket'] ); ?>
 						</h2>
 						<?php
 					endif;
 
-					echo self::render_entry( $entry, $settings, $instance_id ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped within the method.
+					echo self::render_entry( $entry, $settings, $instance_id, $force_hidden, $mark_query ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped within the method.
+					++$row_index;
 				endforeach;
 				?>
 
-				<p class="apglos__empty" data-apglos-empty hidden>
+				<p class="apglos__empty" data-apglos-empty <?php echo ( 'no_results' === $preview ) ? '' : 'hidden'; ?>>
 					<?php echo esc_html( $settings['empty_message'] ); ?>
 				</p>
 			</div>
@@ -487,18 +564,27 @@ class Apglos_Renderer {
 	/**
 	 * Render one glossary entry.
 	 *
-	 * @param array  $entry       The prepared entry.
-	 * @param array  $settings    Resolved settings.
-	 * @param string $instance_id The instance id, for unique anchors.
+	 * @param array  $entry        The prepared entry.
+	 * @param array  $settings     Resolved settings.
+	 * @param string $instance_id  The instance id, for unique anchors.
+	 * @param bool   $force_hidden Start hidden (used by the editor preview mock).
+	 * @param string $mark_query   Highlight this substring in the term (editor
+	 *                             preview mock only).
 	 * @return string
 	 */
-	private static function render_entry( $entry, $settings, $instance_id ) {
+	private static function render_entry( $entry, $settings, $instance_id, $force_hidden = false, $mark_query = '' ) {
 		// The category slugs this entry belongs to, for client-side filtering.
 		$cat_slugs = array();
 		foreach ( $entry['categories'] as $cat ) {
 			$cat_slugs[] = $cat['slug'];
 		}
 		$anchor = $instance_id . '-term-' . $entry['slug'];
+
+		// Term markup: plain by default, or with a highlighted match for the
+		// editor "searching" preview.
+		$term_html = ( '' !== $mark_query )
+			? self::highlight_plain( $entry['title'], $mark_query )
+			: wptexturize( esc_html( $entry['title'] ) );
 
 		ob_start();
 		?>
@@ -508,9 +594,10 @@ class Apglos_Renderer {
 			data-letter="<?php echo esc_attr( $entry['bucket'] ); ?>"
 			data-category="<?php echo esc_attr( implode( ' ', $cat_slugs ) ); ?>"
 			data-search="<?php echo esc_attr( $entry['search'] ); ?>"
+			<?php echo $force_hidden ? 'hidden' : ''; ?>
 		>
 			<?php // Term, always shown, bold by default, curled apostrophes. ?>
-			<span class="apglos__term" data-apglos-term><?php echo wp_kses_post( wptexturize( esc_html( $entry['title'] ) ) ); ?></span>
+			<span class="apglos__term" data-apglos-term><?php echo wp_kses_post( $term_html ); ?></span>
 
 			<?php // Category label, off by default, links to that filtered view. ?>
 			<?php if ( $settings['show_category_label'] && ! empty( $entry['categories'] ) ) : ?>

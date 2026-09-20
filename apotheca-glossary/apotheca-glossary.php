@@ -52,6 +52,7 @@ require_once APGLOS_PATH . 'includes/class-meta.php';
 require_once APGLOS_PATH . 'includes/class-importer.php';
 require_once APGLOS_PATH . 'includes/class-renderer.php';
 require_once APGLOS_PATH . 'includes/class-shortcode.php';
+require_once APGLOS_PATH . 'elementor/class-elementor-loader.php';
 
 /*
  * -----------------------------------------------------------------------------
@@ -86,6 +87,11 @@ function apglos_init() {
 	// The [apotheca_glossary] shortcode and its shared front-end assets.
 	$shortcode = new Apglos_Shortcode();
 	$shortcode->init();
+
+	// The Elementor widget. Its methods hang off Elementor's own hooks, so on a
+	// site without Elementor nothing here fires.
+	$elementor = new Apglos_Elementor_Loader();
+	$elementor->init();
 }
 add_action( 'plugins_loaded', 'apglos_init' );
 

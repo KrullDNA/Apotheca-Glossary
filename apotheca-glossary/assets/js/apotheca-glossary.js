@@ -107,6 +107,18 @@
 	 * Wire up a single glossary instance.
 	 */
 	function initGlossary( root ) {
+		// Never initialise twice (Elementor can re-inject the same node).
+		if ( root.__apglosInit ) {
+			return;
+		}
+		// In the Elementor editor, preview-state mocks are static: leave them
+		// exactly as rendered so they can be styled without the JS reshuffling.
+		if ( root.getAttribute( 'data-apglos-preview' ) ) {
+			root.__apglosInit = true;
+			return;
+		}
+		root.__apglosInit = true;
+
 		// Grab the pieces we need. Any of the controls may be absent, since the
 		// widget can switch them off.
 		var searchInput = root.querySelector( '[data-apglos-search]' );
@@ -405,7 +417,7 @@
 	}
 
 	/**
-	 * Boot every glossary on the page.
+	 * Boot every glossary currently on the page.
 	 */
 	function boot() {
 		var roots = document.querySelectorAll( '[data-apglos]' );
@@ -414,9 +426,44 @@
 		}
 	}
 
+	/**
+	 * Watch for glossaries added after load, so the widget still works when
+	 * Elementor injects or re-renders it in the editor without a page reload.
+	 */
+	function watchForInjected() {
+		if ( ! window.MutationObserver ) {
+			return;
+		}
+		var observer = new MutationObserver( function ( mutations ) {
+			for ( var m = 0; m < mutations.length; m++ ) {
+				var added = mutations[ m ].addedNodes;
+				for ( var n = 0; n < added.length; n++ ) {
+					var node = added[ n ];
+					if ( 1 !== node.nodeType ) {
+						continue; // Elements only.
+					}
+					if ( node.matches && node.matches( '[data-apglos]' ) ) {
+						initGlossary( node );
+					}
+					if ( node.querySelectorAll ) {
+						var inner = node.querySelectorAll( '[data-apglos]' );
+						for ( var q = 0; q < inner.length; q++ ) {
+							initGlossary( inner[ q ] );
+						}
+					}
+				}
+			}
+		} );
+		observer.observe( document.body, { childList: true, subtree: true } );
+	}
+
 	if ( 'loading' === document.readyState ) {
-		document.addEventListener( 'DOMContentLoaded', boot );
+		document.addEventListener( 'DOMContentLoaded', function () {
+			boot();
+			watchForInjected();
+		} );
 	} else {
 		boot();
+		watchForInjected();
 	}
 } )();
