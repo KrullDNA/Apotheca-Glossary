@@ -262,15 +262,17 @@
 	outline-offset: 2px;
 }
 
-/* Search highlight. Some themes and Elementor global styles set the bare
-   <mark> element to a dark background with !important, which would otherwise
-   paint the highlight as a solid black box. The !important here beats that so
-   the default highlight is always readable; the widget's highlight controls
-   use a more specific !important rule, so a designer's chosen colours still
-   win over this default. */
+/* Search highlight.
+   Some themes and Elementor global styles set the bare <mark> element to a
+   dark background with !important, which would otherwise paint the highlight
+   as a solid black box. To beat that reliably, this static rule carries the
+   !important, but it reads its colours from custom properties. The widget's
+   highlight controls (and anyone using Additional CSS) simply set those
+   properties on the wrapper, so a chosen colour always flows through here and
+   wins, while nothing is hardcoded. Unset, it falls back to a readable yellow. */
 .apglos mark.apglos-mark {
-	background: #ffe680 !important;
-	color: inherit !important;
+	background: var( --apglos-hl-bg, #ffe680 ) !important;
+	color: var( --apglos-hl-color, inherit ) !important;
 	padding: 0 1px;
 	border-radius: 2px;
 }

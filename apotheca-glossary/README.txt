@@ -3,7 +3,7 @@ Contributors: krulldna
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.0.3
+Stable tag: 1.0.4
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -91,6 +91,9 @@ Attributes (all optional): `show_search`, `show_az_bar`, `show_09`, `show_catego
 * The search field sits in a search landmark, the letter bar is a labelled group, and the letter headings give the page a proper heading structure.
 
 == Changelog ==
+
+= 1.0.4 =
+* The search highlight colours from the widget now always show, instead of falling back to the default yellow, while still beating a theme that styles the bare mark element. The colours flow through custom properties that the widget sets, so nothing is hardcoded. On activation the plugin also clears Elementor's cached CSS so the change takes effect without a manual Regenerate CSS step.
 
 = 1.0.3 =
 * Hardened the search highlight so it is never painted as a solid black box by a theme or Elementor global style that sets the bare mark element to a dark background with !important. The default highlight now always shows, and the widget's own highlight colours still override it.

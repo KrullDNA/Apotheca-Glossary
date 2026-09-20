@@ -3,7 +3,7 @@
  * Plugin Name:       Apotheca® Glossary
  * Plugin URI:        https://apothecacosmetics.com/
  * Description:        A searchable, filterable glossary of cosmetic terminology, with automatic in-content linking of glossary terms in blog posts.
- * Version:           1.0.3
+ * Version:           1.0.4
  * Requires at least: 6.0
  * Requires PHP:      7.4
  * Author:            Krull Design & Advertising
@@ -28,7 +28,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * means the version number, paths and URLs live in a single place.
  */
 
-define( 'APGLOS_VERSION', '1.0.3' );
+define( 'APGLOS_VERSION', '1.0.4' );
 define( 'APGLOS_FILE', __FILE__ );
 define( 'APGLOS_PATH', plugin_dir_path( __FILE__ ) );
 define( 'APGLOS_URL', plugin_dir_url( __FILE__ ) );
@@ -185,6 +185,13 @@ function apglos_activate() {
 
 	// Rebuild permalinks so /glossary/ and /glossary-category/ resolve.
 	flush_rewrite_rules();
+
+	// If Elementor is active, clear its cached CSS so the widget's styles,
+	// including the search highlight, are regenerated with this version's
+	// rules. This saves a manual Regenerate CSS step after updating.
+	if ( class_exists( '\Elementor\Plugin' ) && isset( \Elementor\Plugin::$instance->files_manager ) ) {
+		\Elementor\Plugin::$instance->files_manager->clear_cache();
+	}
 }
 register_activation_hook( __FILE__, 'apglos_activate' );
 

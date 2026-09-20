@@ -1539,15 +1539,15 @@ class Apglos_Glossary_Widget extends Widget_Base {
 			)
 		);
 
-		// The !important guarantees the chosen colours win over themes that
-		// style the <mark> element for their own search highlighting (a common
-		// cause of the highlight appearing in an unexpected colour).
+		// These set custom properties on the wrapper. The plugin's static CSS
+		// reads them with !important, so the chosen colours win over a theme
+		// that styles the bare <mark> element, without hardcoding anything.
 		$this->add_control(
 			'highlight_bg',
 			array(
 				'label'     => __( 'Highlight background', 'apotheca-glossary' ),
 				'type'      => Controls_Manager::COLOR,
-				'selectors' => array( '{{WRAPPER}} mark.apglos-mark' => 'background-color: {{VALUE}} !important;' ),
+				'selectors' => array( '{{WRAPPER}}' => '--apglos-hl-bg: {{VALUE}};' ),
 			)
 		);
 
@@ -1556,7 +1556,7 @@ class Apglos_Glossary_Widget extends Widget_Base {
 			array(
 				'label'     => __( 'Highlight text colour', 'apotheca-glossary' ),
 				'type'      => Controls_Manager::COLOR,
-				'selectors' => array( '{{WRAPPER}} mark.apglos-mark' => 'color: {{VALUE}} !important;' ),
+				'selectors' => array( '{{WRAPPER}}' => '--apglos-hl-color: {{VALUE}};' ),
 			)
 		);
 
