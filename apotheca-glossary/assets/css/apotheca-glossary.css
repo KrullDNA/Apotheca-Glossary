@@ -140,11 +140,15 @@
 	font-size: 1.4rem;
 	line-height: 1.2;
 	border-bottom: 1px solid #e2e5ea;
+	scroll-margin-top: var( --apglos-anchor-offset, 100px );
 }
 
 .apglos__entry {
 	margin: 0 0 1.25rem;
-	scroll-margin-top: 1.5rem;
+	/* Stop the anchor jump this far below the top, so a fixed or transparent
+	   site header does not cover the term. Adjustable via the widget's Anchor
+	   offset control (or by overriding --apglos-anchor-offset). */
+	scroll-margin-top: var( --apglos-anchor-offset, 100px );
 }
 
 /* Keep entries and headings whole when the list flows into two columns

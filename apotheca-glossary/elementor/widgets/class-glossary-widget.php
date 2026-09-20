@@ -347,6 +347,24 @@ class Apglos_Glossary_Widget extends Widget_Base {
 			)
 		);
 
+		// Anchor scroll offset: how far below the top a related-term jump lands,
+		// so a fixed or transparent header does not cover the term. Per device,
+		// since header height often differs on mobile.
+		$this->add_responsive_control(
+			'anchor_offset',
+			array(
+				'label'          => __( 'Anchor offset', 'apotheca-glossary' ),
+				'type'           => Controls_Manager::SLIDER,
+				'size_units'     => array( 'px', 'rem', 'em' ),
+				'range'          => array( 'px' => array( 'min' => 0, 'max' => 400 ) ),
+				'default'        => array( 'unit' => 'px', 'size' => 100 ),
+				'selectors'      => array(
+					'{{WRAPPER}}' => '--apglos-anchor-offset: {{SIZE}}{{UNIT}};',
+				),
+				'description'    => __( 'How far below the top a jump to a related term lands, so a fixed or transparent header does not cover it. Set it per device.', 'apotheca-glossary' ),
+			)
+		);
+
 		$this->end_controls_section();
 	}
 
