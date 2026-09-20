@@ -1,0 +1,302 @@
+/**
+ * Apotheca Glossary, front-end structure.
+ *
+ * This is structural and light-touch by design: it lays the glossary out and
+ * gives it a clean default look so the shortcode works on any theme, while
+ * staying easy to override. In Elementor, the widget's own style controls take
+ * over the visual styling.
+ */
+
+/* Wrapper, full width with no default padding or margin. */
+.apglos {
+	--apglos-gap: 1.5rem;
+	width: 100%;
+	max-width: 100%;
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+}
+
+.apglos *,
+.apglos *::before,
+.apglos *::after {
+	box-sizing: border-box;
+}
+
+/* Anything hidden by the filtering is truly removed from layout. */
+.apglos [hidden] {
+	display: none !important;
+}
+
+/* Controls row */
+.apglos__controls {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.75rem;
+	margin-bottom: var(--apglos-gap);
+}
+
+.apglos__search-wrap,
+.apglos__category-wrap {
+	flex: 1 1 220px;
+	min-width: 180px;
+}
+
+.apglos__search,
+.apglos__category {
+	width: 100%;
+	padding: 0.6rem 0.75rem;
+	font-size: 1rem;
+	line-height: 1.4;
+	border: 1px solid #c9ced6;
+	border-radius: 4px;
+	background: #fff;
+	color: inherit;
+}
+
+.apglos__search:focus,
+.apglos__category:focus {
+	outline: 2px solid #55606e;
+	outline-offset: 1px;
+	border-color: #55606e;
+}
+
+/* A to Z bar */
+.apglos__az {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.25rem;
+	flex: 1 1 100%;
+	order: 3; /* Drop the bar onto its own line below search + category. */
+}
+
+.apglos__letter {
+	min-width: 2rem;
+	padding: 0.35rem 0.5rem;
+	font-size: 0.9rem;
+	line-height: 1;
+	text-align: center;
+	border: 1px solid #d3d7de;
+	border-radius: 4px;
+	background: #f6f7f9;
+	color: inherit;
+	cursor: pointer;
+}
+
+.apglos__letter:hover:not(:disabled) {
+	background: #eceef1;
+}
+
+.apglos__letter.is-active {
+	background: #2b333f;
+	border-color: #2b333f;
+	color: #fff;
+	font-weight: 600;
+}
+
+/* Empty letters, greyed and unclickable (unless the widget hides them). */
+.apglos__letter.is-empty,
+.apglos__letter:disabled {
+	opacity: 0.4;
+	cursor: default;
+	pointer-events: none;
+}
+
+/* Clear all */
+.apglos__clear {
+	padding: 0.4rem 0.6rem;
+	font-size: 0.9rem;
+	background: none;
+	border: none;
+	color: #1a5f9e;
+	text-decoration: underline;
+	cursor: pointer;
+}
+
+.apglos__clear:hover {
+	color: #0f3f6c;
+}
+
+/* Result count */
+.apglos__count {
+	margin: 0 0 var(--apglos-gap);
+	font-size: 0.9rem;
+	color: #55606e;
+}
+
+/* List and entries */
+.apglos__list {
+	margin: 0;
+}
+
+.apglos__heading {
+	margin: 1.75rem 0 0.75rem;
+	padding-bottom: 0.35rem;
+	font-size: 1.4rem;
+	line-height: 1.2;
+	border-bottom: 1px solid #e2e5ea;
+}
+
+.apglos__entry {
+	margin: 0 0 1.25rem;
+	scroll-margin-top: 1.5rem;
+}
+
+/* Keep entries and headings whole when the list flows into two columns
+   (the widget's per-device Columns control sets column-count). */
+.apglos__heading,
+.apglos__entry {
+	break-inside: avoid;
+	-webkit-column-break-inside: avoid;
+}
+
+.apglos__term {
+	display: block;
+	font-weight: 700;
+	font-size: 1.1rem;
+	line-height: 1.3;
+}
+
+.apglos__definition {
+	margin-top: 0.25rem;
+	max-width: 70ch;
+}
+
+.apglos__definition p {
+	margin: 0 0 0.5rem;
+}
+
+.apglos__definition p:last-child {
+	margin-bottom: 0;
+}
+
+/* Category label */
+.apglos__cat-labels {
+	display: inline-flex;
+	flex-wrap: wrap;
+	gap: 0.35rem;
+	margin-top: 0.25rem;
+}
+
+.apglos__cat-label {
+	display: inline-block;
+	padding: 0.1rem 0.5rem;
+	font-size: 0.75rem;
+	line-height: 1.6;
+	border-radius: 3px;
+	background: #eef0f3;
+	color: #3a4653;
+	text-decoration: none;
+}
+
+.apglos__cat-label:hover {
+	background: #e2e5ea;
+}
+
+/* Also known as */
+.apglos__aka {
+	margin: 0.35rem 0 0;
+	font-size: 0.9rem;
+}
+
+.apglos__aka-label {
+	font-weight: 600;
+	margin-right: 0.35rem;
+}
+
+/* Related terms */
+.apglos__related {
+	margin: 0.35rem 0 0;
+	font-size: 0.9rem;
+}
+
+.apglos__related-label {
+	font-weight: 600;
+	margin-right: 0.35rem;
+}
+
+.apglos__related-link {
+	text-decoration: underline;
+}
+
+/* A brief flash when a related link jumps to a term. */
+.apglos__entry.is-target {
+	animation: apglos-flash 1.6s ease-out;
+}
+
+@keyframes apglos-flash {
+	0% { background: #fff5cc; }
+	100% { background: transparent; }
+}
+
+/* Visible focus states for keyboard users, on every interactive element.
+   Uses :focus-visible so a mouse click does not leave a lingering ring, with a
+   :focus fallback for older browsers. */
+.apglos__letter:focus-visible,
+.apglos__clear:focus-visible,
+.apglos__cat-label:focus-visible,
+.apglos__related-link:focus-visible,
+.apglos__search:focus-visible,
+.apglos__category:focus-visible {
+	outline: 2px solid #2b333f;
+	outline-offset: 2px;
+}
+
+.apglos__letter:focus,
+.apglos__clear:focus,
+.apglos__cat-label:focus,
+.apglos__related-link:focus {
+	outline: 2px solid #2b333f;
+	outline-offset: 2px;
+}
+
+/* Search highlight */
+mark.apglos-mark {
+	background: #ffe680;
+	color: inherit;
+	padding: 0 1px;
+	border-radius: 2px;
+}
+
+/* Empty state */
+.apglos__empty {
+	margin: 1rem 0;
+	font-style: italic;
+	color: #55606e;
+}
+
+/* Visually hidden, for screen-reader-only labels. */
+.apglos .screen-reader-text {
+	position: absolute !important;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
+}
+
+/* Editor-only preview: the "no results" mock hides every entry and heading
+   and shows the empty message. Applied via the data-apglos-preview attribute
+   the widget only ever adds inside the Elementor editor. */
+.apglos[data-apglos-preview="no_results"] .apglos__entry,
+.apglos[data-apglos-preview="no_results"] .apglos__heading {
+	display: none !important;
+}
+
+/* Small screens: let the letter bar scroll rather than break the layout. */
+@media (max-width: 480px) {
+	.apglos__az {
+		flex-wrap: nowrap;
+		overflow-x: auto;
+		-webkit-overflow-scrolling: touch;
+		padding-bottom: 0.25rem;
+	}
+
+	.apglos__letter {
+		flex: 0 0 auto;
+	}
+}

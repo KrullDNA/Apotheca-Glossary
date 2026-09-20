@@ -1,0 +1,182 @@
+/**
+ * Admin styles for the Apotheca Glossary importer page.
+ *
+ * Loaded only on the Import / Export screen. Kept deliberately light: it uses
+ * WordPress admin colours and spacing so the page feels native.
+ */
+
+/* Card, a white panel that groups a section of the page. */
+.apglos-import .apglos-card {
+	background: #fff;
+	border: 1px solid #c3c4c7;
+	border-radius: 4px;
+	padding: 20px 24px;
+	margin: 20px 0;
+	max-width: 1100px;
+}
+
+.apglos-import .apglos-card h2 {
+	margin-top: 0;
+}
+
+/* Danger card, used for the replace-all confirmation. */
+.apglos-import .apglos-card--danger {
+	border-color: #d63638;
+	border-left-width: 4px;
+}
+
+.apglos-import .apglos-danger-text {
+	color: #8a1f1f;
+	font-weight: 600;
+}
+
+/* Summary table of create / update / skip / delete counts. */
+.apglos-import .apglos-summary {
+	border-collapse: collapse;
+	margin: 12px 0 20px;
+}
+
+.apglos-import .apglos-summary th,
+.apglos-import .apglos-summary td {
+	text-align: left;
+	padding: 6px 18px 6px 0;
+	vertical-align: middle;
+}
+
+.apglos-import .apglos-summary td {
+	font-weight: 600;
+	font-size: 15px;
+}
+
+.apglos-import .apglos-summary__danger th,
+.apglos-import .apglos-summary__danger td {
+	color: #8a1f1f;
+}
+
+/* Coloured badges for each action. */
+.apglos-import .apglos-badge {
+	display: inline-block;
+	min-width: 22px;
+	padding: 2px 8px;
+	margin-right: 8px;
+	border-radius: 10px;
+	font-size: 12px;
+	font-weight: 600;
+	line-height: 1.6;
+	text-align: center;
+	color: #fff;
+	background: #646970;
+}
+
+.apglos-import .apglos-badge--create {
+	background: #00844a;
+}
+
+.apglos-import .apglos-badge--update {
+	background: #1d6fb8;
+}
+
+.apglos-import .apglos-badge--skip {
+	background: #8c8f94;
+}
+
+.apglos-import .apglos-badge--invalid {
+	background: #b32d2e;
+}
+
+.apglos-import .apglos-badge--delete {
+	background: #d63638;
+}
+
+/* Result list on the finished screen. */
+.apglos-import .apglos-result-list {
+	list-style: none;
+	margin: 0 0 16px;
+	padding: 0;
+	font-size: 15px;
+}
+
+.apglos-import .apglos-result-list li {
+	margin: 6px 0;
+}
+
+/* Validation report blocks. */
+.apglos-import .apglos-report {
+	border-radius: 4px;
+	padding: 12px 16px;
+	margin: 16px 0;
+}
+
+.apglos-import .apglos-report h3 {
+	margin-top: 0;
+}
+
+.apglos-import .apglos-report--error {
+	background: #fcf0f1;
+	border-left: 4px solid #d63638;
+}
+
+.apglos-import .apglos-report--warning {
+	background: #fcf9e8;
+	border-left: 4px solid #dba617;
+}
+
+.apglos-import .apglos-report ul {
+	margin: 8px 0 0;
+	padding-left: 18px;
+}
+
+/* Scroll container for the full per-row preview table. */
+.apglos-import .apglos-table-scroll {
+	max-height: 460px;
+	overflow-y: auto;
+	border: 1px solid #dcdcde;
+	border-radius: 4px;
+	margin-bottom: 20px;
+}
+
+.apglos-import .apglos-preview-table code {
+	font-size: 12px;
+}
+
+.apglos-import .apglos-note-warning {
+	color: #8a6d00;
+	font-size: 12px;
+}
+
+/* Radio list of import modes. */
+.apglos-import .apglos-mode {
+	display: block;
+	margin: 0 0 14px;
+	line-height: 1.5;
+}
+
+.apglos-import .apglos-mode .description {
+	display: block;
+	margin-left: 24px;
+	color: #646970;
+}
+
+/* Deleted-terms disclosure. */
+.apglos-import .apglos-details {
+	margin: 8px 0 16px;
+}
+
+.apglos-import .apglos-delete-list {
+	margin: 8px 0 0;
+	max-height: 200px;
+	overflow-y: auto;
+	columns: 3;
+}
+
+/* Danger buttons. */
+.apglos-import .apglos-button-danger {
+	background: #d63638;
+	border-color: #b32d2e;
+}
+
+.apglos-import .apglos-button-danger:hover,
+.apglos-import .apglos-button-danger:focus {
+	background: #b32d2e;
+	border-color: #8a1f1f;
+}
