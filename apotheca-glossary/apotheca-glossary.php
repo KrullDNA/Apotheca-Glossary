@@ -3,7 +3,7 @@
  * Plugin Name:       Apotheca® Glossary
  * Plugin URI:        https://apothecacosmetics.com/
  * Description:        A searchable, filterable glossary of cosmetic terminology, with automatic in-content linking of glossary terms in blog posts.
- * Version:           1.0.0
+ * Version:           1.0.1
  * Requires at least: 6.0
  * Requires PHP:      7.4
  * Author:            Krull Design & Advertising
@@ -28,7 +28,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * means the version number, paths and URLs live in a single place.
  */
 
-define( 'APGLOS_VERSION', '1.0.0' );
+define( 'APGLOS_VERSION', '1.0.1' );
 define( 'APGLOS_FILE', __FILE__ );
 define( 'APGLOS_PATH', plugin_dir_path( __FILE__ ) );
 define( 'APGLOS_URL', plugin_dir_url( __FILE__ ) );

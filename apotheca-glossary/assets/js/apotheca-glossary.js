@@ -243,6 +243,13 @@
 				emptyEl.hidden = shown !== 0;
 			}
 
+			// With a single result, drop to one column so the heading and its
+			// entry stay together on the left instead of splitting across two.
+			var listEl = root.querySelector( '[data-apglos-list]' );
+			if ( listEl ) {
+				listEl.classList.toggle( 'apglos-list--single', shown === 1 );
+			}
+
 			// Letter bar active state, and keep the tab stop on the active
 			// letter so keyboard users land on the current selection.
 			var activeButton = null;

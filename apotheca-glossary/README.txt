@@ -3,7 +3,7 @@ Contributors: krulldna
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -91,6 +91,11 @@ Attributes (all optional): `show_search`, `show_az_bar`, `show_09`, `show_catego
 * The search field sits in a search landmark, the letter bar is a labelled group, and the letter headings give the page a proper heading structure.
 
 == Changelog ==
+
+= 1.0.1 =
+* Search highlight colours now override a theme that styles the mark element, so the chosen background and text colours always show.
+* Added normal and hover background controls to the Clear all link, plus border, radius and padding, so it can be styled as a button, and stopped a theme's button hover background showing through by default.
+* When a filter leaves a single result, the glossary drops to one column so the letter heading and its entry stay together on the left.
 
 = 1.0.0 =
 * First release.
