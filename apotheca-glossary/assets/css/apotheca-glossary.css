@@ -235,14 +235,16 @@
 	text-decoration: underline;
 }
 
-/* A brief flash when a related link jumps to a term. */
+/* The term the reader was brought to (from an in-content link or a related
+   term). The highlight stays put so it is clear which term is meant, and clears
+   as soon as they search or filter. The colour is set by the widget's
+   Selected-term control; the box-shadow gives the highlight some breathing room
+   without shifting the layout. */
 .apglos__entry.is-target {
-	animation: apglos-flash 1.6s ease-out;
-}
-
-@keyframes apglos-flash {
-	0% { background: #fff5cc; }
-	100% { background: transparent; }
+	background: var( --apglos-target-bg, #fff5cc );
+	box-shadow: 0 0 0 0.4rem var( --apglos-target-bg, #fff5cc );
+	border-radius: 3px;
+	transition: background 0.3s ease, box-shadow 0.3s ease;
 }
 
 /* Visible focus states for keyboard users, on every interactive element.

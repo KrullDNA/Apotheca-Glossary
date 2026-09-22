@@ -3,7 +3,7 @@ Contributors: krulldna
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.5.3
+Stable tag: 1.6.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -91,6 +91,9 @@ Attributes (all optional): `show_search`, `show_az_bar`, `show_09`, `show_catego
 * The search field sits in a search landmark, the letter bar is a labelled group, and the letter headings give the page a proper heading structure.
 
 == Changelog ==
+
+= 1.6.0 =
+* The term a reader is brought to (from an in-content link or a related term) now stays highlighted so it is clear which term is meant, instead of a highlight that flashes and fades. The highlight clears as soon as they search or filter. Added a Selected term highlight colour control to the widget's Search highlight section.
 
 = 1.5.3 =
 * Fixed the in-content link parameter clashing with the glossary post type. The scroll parameter was named apglos_term, the same as the post type, so WordPress rendered the single term instead of the glossary page. It is now apglos_scroll, so links open the full glossary page and scroll to the term as intended.

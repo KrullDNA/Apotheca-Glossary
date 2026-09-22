@@ -1578,6 +1578,27 @@ class Apglos_Glossary_Widget extends Widget_Base {
 			)
 		);
 
+		// The persistent highlight shown on the term a reader is brought to from
+		// an in-content link or a related term.
+		$this->add_control(
+			'target_heading',
+			array(
+				'label'     => __( 'Selected term', 'apotheca-glossary' ),
+				'type'      => Controls_Manager::HEADING,
+				'separator' => 'before',
+			)
+		);
+
+		$this->add_control(
+			'target_bg',
+			array(
+				'label'       => __( 'Selected term highlight', 'apotheca-glossary' ),
+				'type'        => Controls_Manager::COLOR,
+				'description' => __( 'The background shown on the term a reader lands on from an in-content link or a related term, so it is clear which term is meant. It clears when they search or filter.', 'apotheca-glossary' ),
+				'selectors'   => array( '{{WRAPPER}}' => '--apglos-target-bg: {{VALUE}};' ),
+			)
+		);
+
 		$this->end_controls_section();
 	}
 
