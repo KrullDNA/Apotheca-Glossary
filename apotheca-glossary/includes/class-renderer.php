@@ -355,6 +355,12 @@ class Apglos_Renderer {
 		++self::$instance;
 		$instance_id = 'apglos-' . self::$instance;
 
+		// Stable anchor base for entry ids, so in-content links can target a
+		// term reliably. The first glossary on a page uses the bare "apglos"
+		// prefix (giving ids like apglos-term-slug, which linkify points to);
+		// any further glossaries are numbered to keep ids unique.
+		$anchor_base = ( 1 === self::$instance ) ? 'apglos' : 'apglos-' . self::$instance;
+
 		// Editor-only preview state. The JavaScript skips any instance carrying
 		// data-apglos-preview, so these mocks never move on the front end.
 		$preview = in_array( $settings['preview_state'], array( 'searching', 'no_results' ), true ) ? $settings['preview_state'] : '';
@@ -484,7 +490,7 @@ class Apglos_Renderer {
 						<?php
 					endif;
 
-					echo self::render_entry( $entry, $settings, $instance_id, $force_hidden, $mark_query ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped within the method.
+					echo self::render_entry( $entry, $settings, $anchor_base, $force_hidden, $mark_query ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped within the method.
 					++$row_index;
 				endforeach;
 				?>
@@ -566,19 +572,20 @@ class Apglos_Renderer {
 	 *
 	 * @param array  $entry        The prepared entry.
 	 * @param array  $settings     Resolved settings.
-	 * @param string $instance_id  The instance id, for unique anchors.
+	 * @param string $anchor_base  The anchor prefix, for the entry id and the
+	 *                             related-term links.
 	 * @param bool   $force_hidden Start hidden (used by the editor preview mock).
 	 * @param string $mark_query   Highlight this substring in the term (editor
 	 *                             preview mock only).
 	 * @return string
 	 */
-	private static function render_entry( $entry, $settings, $instance_id, $force_hidden = false, $mark_query = '' ) {
+	private static function render_entry( $entry, $settings, $anchor_base, $force_hidden = false, $mark_query = '' ) {
 		// The category slugs this entry belongs to, for client-side filtering.
 		$cat_slugs = array();
 		foreach ( $entry['categories'] as $cat ) {
 			$cat_slugs[] = $cat['slug'];
 		}
-		$anchor = $instance_id . '-term-' . $entry['slug'];
+		$anchor = $anchor_base . '-term-' . $entry['slug'];
 
 		// Term markup: plain by default, or with a highlighted match for the
 		// editor "searching" preview.
@@ -633,7 +640,7 @@ class Apglos_Renderer {
 					foreach ( $entry['related'] as $rel ) {
 						$links[] = sprintf(
 							'<a class="apglos__related-link" href="#%1$s" data-apglos-related="%2$s">%3$s</a>',
-							esc_attr( $instance_id . '-term-' . $rel['slug'] ),
+							esc_attr( $anchor_base . '-term-' . $rel['slug'] ),
 							esc_attr( $rel['slug'] ),
 							esc_html( $rel['name'] )
 						);

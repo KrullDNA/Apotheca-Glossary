@@ -515,6 +515,26 @@
 	}
 
 	/**
+	 * If the page was opened at a term anchor (an in-content glossary link),
+	 * scroll to that term once the glossaries are built, so the browser honours
+	 * the anchor offset even though the entries were laid out by JavaScript.
+	 */
+	function scrollToHashTerm() {
+		var hash = window.location.hash;
+		if ( ! hash || hash.indexOf( '#apglos' ) !== 0 ) {
+			return;
+		}
+		var target = document.getElementById( hash.slice( 1 ) );
+		if ( target && target.hasAttribute( 'data-apglos-entry' ) ) {
+			// Wait a frame so layout has settled, then scroll (scroll-margin-top
+			// applies the header offset).
+			window.requestAnimationFrame( function () {
+				target.scrollIntoView( { block: 'start' } );
+			} );
+		}
+	}
+
+	/**
 	 * Boot every glossary currently on the page.
 	 */
 	function boot() {
@@ -522,6 +542,7 @@
 		for ( var i = 0; i < roots.length; i++ ) {
 			initGlossary( roots[ i ] );
 		}
+		scrollToHashTerm();
 	}
 
 	/**

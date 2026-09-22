@@ -455,9 +455,21 @@ class Apglos_Linkify {
 		$map     = array();
 		$phrases = array();
 
+		// When a glossary page URL is set, links point there and scroll to the
+		// term (via the stable anchor the renderer gives each entry), so the
+		// reader lands on the full glossary. Otherwise they go to the term's
+		// own page.
+		$page_url = trim( (string) apglos_get_setting( 'glossary_page_url' ) );
+
 		foreach ( $posts as $post ) {
+			if ( '' !== $page_url ) {
+				$url = rtrim( $page_url, '#' ) . '#apglos-term-' . $post->post_name;
+			} else {
+				$url = get_permalink( $post->ID );
+			}
+
 			$term = array(
-				'url'   => get_permalink( $post->ID ),
+				'url'   => $url,
 				'title' => $post->post_title,
 				'slug'  => $post->post_name,
 			);
