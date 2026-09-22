@@ -88,6 +88,7 @@ class Apglos_Settings {
 		$this->add_field( 'linkify_new_tab', __( 'Open links in a new tab', 'apotheca-glossary' ), 'field_linkify_new_tab', 'apglos_linkify_section' );
 		$this->add_field( 'linkify_new_tab_note', __( 'New-tab note for screen readers', 'apotheca-glossary' ), 'field_linkify_new_tab_note', 'apglos_linkify_section' );
 		$this->add_field( 'linkify_external_icon', __( 'External-link icon', 'apotheca-glossary' ), 'field_linkify_external_icon', 'apglos_linkify_section' );
+		$this->add_field( 'linkify_dynamic_fields', __( 'Link inside dynamic fields', 'apotheca-glossary' ), 'field_linkify_dynamic_fields', 'apglos_linkify_section' );
 		$this->add_field( 'linkify_excluded_post_types', __( 'Do not link in these post types', 'apotheca-glossary' ), 'field_excluded_post_types', 'apglos_linkify_section' );
 
 		// General section.
@@ -189,6 +190,15 @@ class Apglos_Settings {
 	}
 
 	/**
+	 * Link-inside-dynamic-fields field.
+	 *
+	 * @return void
+	 */
+	public function field_linkify_dynamic_fields() {
+		$this->checkbox( 'linkify_dynamic_fields', __( 'Also add links inside dynamic field widgets (for pages built with JetEngine or Elementor dynamic fields, not just the classic editor)', 'apotheca-glossary' ) );
+	}
+
+	/**
 	 * Excluded post types field.
 	 *
 	 * @return void
@@ -283,9 +293,10 @@ class Apglos_Settings {
 
 		$out['linkify_enabled']       = ! empty( $input['linkify_enabled'] );
 		$out['linkify_cap']           = isset( $input['linkify_cap'] ) ? max( 0, absint( $input['linkify_cap'] ) ) : 3;
-		$out['linkify_new_tab']       = ! empty( $input['linkify_new_tab'] );
-		$out['linkify_new_tab_note']  = ! empty( $input['linkify_new_tab_note'] );
-		$out['linkify_external_icon'] = ! empty( $input['linkify_external_icon'] );
+		$out['linkify_new_tab']        = ! empty( $input['linkify_new_tab'] );
+		$out['linkify_new_tab_note']   = ! empty( $input['linkify_new_tab_note'] );
+		$out['linkify_external_icon']  = ! empty( $input['linkify_external_icon'] );
+		$out['linkify_dynamic_fields'] = ! empty( $input['linkify_dynamic_fields'] );
 
 		// Excluded post types: keep only real, public ones.
 		$submitted = isset( $input['linkify_excluded_post_types'] ) ? (array) $input['linkify_excluded_post_types'] : array();

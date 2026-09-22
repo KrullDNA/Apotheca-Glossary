@@ -175,21 +175,50 @@ class Apglos_Linkify {
 	}
 
 	/**
-	 * Linkify glossary terms inside an Elementor Text Editor widget.
+	 * The Elementor widget names whose prose linkify may link inside.
+	 *
+	 * Text Editor is always included. JetEngine's Dynamic Field is added when
+	 * enabled, since many themes render body copy through it. Sites can extend
+	 * this with the apglos_linkify_widget_names filter.
+	 *
+	 * @return string[]
+	 */
+	private function linkable_widget_names() {
+		$names = array( 'text-editor' );
+
+		if ( ! empty( apglos_get_setting( 'linkify_dynamic_fields' ) ) ) {
+			$names[] = 'jet-listing-dynamic-field';
+		}
+
+		return (array) apply_filters( 'apglos_linkify_widget_names', $names );
+	}
+
+	/**
+	 * Linkify glossary terms inside a prose-bearing Elementor/JetEngine widget.
 	 *
 	 * Elementor does not pass this text through the_content, so we hook its own
 	 * widget filter. The cap and the first-occurrence rule are shared across
-	 * every text widget in the post via $this->runs, so a post with several
-	 * text widgets still gets at most the cap, each term linked once.
+	 * every such widget in the post via $this->runs, so a post with several
+	 * widgets still gets at most the cap, each term linked once.
 	 *
 	 * @param string $content The rendered widget HTML.
 	 * @param object $widget  The Elementor widget instance.
 	 * @return string
 	 */
 	public function filter_elementor_widget( $content, $widget ) {
-		// Only the Text Editor widget. The Post Content widget already runs
-		// through the_content, and other widgets carry no prose to link.
-		if ( ! is_object( $widget ) || ! method_exists( $widget, 'get_name' ) || 'text-editor' !== $widget->get_name() ) {
+		// Only link inside prose-bearing widgets. Text Editor always; JetEngine
+		// Dynamic Field when enabled (many sites render body copy through it).
+		// Other widgets, and the Post Content widget (which already runs through
+		// the_content), are left alone.
+		$name = ( is_object( $widget ) && method_exists( $widget, 'get_name' ) ) ? $widget->get_name() : '';
+		if ( '' === $name || ! in_array( $name, $this->linkable_widget_names(), true ) ) {
+			return $content;
+		}
+
+		// Skip trivially short fields, so metadata like a date, a reading time
+		// or a single tag is not linked, only real body copy. Filterable.
+		$min = (int) apply_filters( 'apglos_linkify_min_field_length', 40, $name );
+		if ( $min > 0 && strlen( trim( wp_strip_all_tags( $content ) ) ) < $min ) {
 			return $content;
 		}
 
