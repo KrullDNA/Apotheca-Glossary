@@ -537,6 +537,38 @@
 	}
 
 	/**
+	 * If the page was opened at ?apglos_term=slug (an in-content glossary link),
+	 * scroll to that term without filtering, so the whole glossary stays on
+	 * screen and the reader lands on the term with the header offset applied.
+	 * The term is found by its slug, so it does not depend on a fixed anchor.
+	 */
+	function scrollToTermParam() {
+		var params;
+		try {
+			params = new URLSearchParams( window.location.search );
+		} catch ( e ) {
+			return;
+		}
+		var slug = params.get( 'apglos_term' );
+		if ( ! slug ) {
+			return;
+		}
+
+		var entries = document.querySelectorAll( '[data-apglos-entry]' );
+		for ( var i = 0; i < entries.length; i++ ) {
+			if ( entries[ i ].getAttribute( 'data-slug' ) === slug && ! entries[ i ].hidden ) {
+				var target = entries[ i ];
+				// A short delay lets images and fonts above settle first, so the
+				// scroll lands accurately. scroll-margin-top applies the offset.
+				window.setTimeout( function () {
+					target.scrollIntoView( { block: 'start' } );
+				}, 80 );
+				return;
+			}
+		}
+	}
+
+	/**
 	 * Boot every glossary currently on the page.
 	 */
 	function boot() {
@@ -545,6 +577,7 @@
 			initGlossary( roots[ i ] );
 		}
 		scrollToHashTerm();
+		scrollToTermParam();
 	}
 
 	/**

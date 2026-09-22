@@ -598,6 +598,7 @@ class Apglos_Renderer {
 		<div class="apglos__entry"
 			id="<?php echo esc_attr( $anchor ); ?>"
 			data-apglos-entry
+			data-slug="<?php echo esc_attr( $entry['slug'] ); ?>"
 			data-letter="<?php echo esc_attr( $entry['bucket'] ); ?>"
 			data-category="<?php echo esc_attr( implode( ' ', $cat_slugs ) ); ?>"
 			data-search="<?php echo esc_attr( $entry['search'] ); ?>"
