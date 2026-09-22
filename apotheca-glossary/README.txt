@@ -3,7 +3,7 @@ Contributors: krulldna
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.3.0
+Stable tag: 1.4.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -91,6 +91,9 @@ Attributes (all optional): `show_search`, `show_az_bar`, `show_09`, `show_catego
 * The search field sits in a search landmark, the letter bar is a labelled group, and the letter headings give the page a proper heading structure.
 
 == Changelog ==
+
+= 1.4.0 =
+* Added glossary link appearance controls to the settings page: underline (on by default, so the links are visible), a link colour and a hover colour. Leaving the colours blank keeps the surrounding text colour.
 
 = 1.3.0 =
 * In-content linking now also works inside JetEngine (and Elementor) dynamic field widgets, which many themes use to render body copy. A short-field guard means small fields like a date, a reading time or a single tag are left alone, only real body copy is linked. A new "Link inside dynamic fields" setting (on by default) controls it, and the linkable widget list and the minimum field length are both filterable.

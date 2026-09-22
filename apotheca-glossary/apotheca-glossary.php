@@ -3,7 +3,7 @@
  * Plugin Name:       Apotheca® Glossary
  * Plugin URI:        https://apothecacosmetics.com/
  * Description:        A searchable, filterable glossary of cosmetic terminology, with automatic in-content linking of glossary terms in blog posts.
- * Version:           1.3.0
+ * Version:           1.4.0
  * Requires at least: 6.0
  * Requires PHP:      7.4
  * Author:            Krull Design & Advertising
@@ -28,7 +28,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * means the version number, paths and URLs live in a single place.
  */
 
-define( 'APGLOS_VERSION', '1.3.0' );
+define( 'APGLOS_VERSION', '1.4.0' );
 define( 'APGLOS_FILE', __FILE__ );
 define( 'APGLOS_PATH', plugin_dir_path( __FILE__ ) );
 define( 'APGLOS_URL', plugin_dir_url( __FILE__ ) );
@@ -65,6 +65,10 @@ function apglos_default_settings() {
 		'linkify_external_icon'       => false, // Optional external-link icon.
 		'linkify_excluded_post_types' => array(), // Global post type exclusions.
 		'linkify_dynamic_fields'      => true,  // Link inside JetEngine dynamic fields.
+		// Glossary link appearance in content.
+		'linkify_link_underline'      => true,  // Underline the links so they are visible.
+		'linkify_link_color'          => '',    // Link colour; empty inherits the text colour.
+		'linkify_link_hover_color'    => '',    // Hover colour; empty keeps the link colour.
 		'glossary_slug'               => 'glossary',
 		// The page that holds the glossary widget/shortcode. When set, in-content
 		// links point here and scroll to the term, instead of the term's own page.

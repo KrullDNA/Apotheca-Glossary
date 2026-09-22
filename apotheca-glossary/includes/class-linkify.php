@@ -804,7 +804,29 @@ class Apglos_Linkify {
 		if ( is_admin() || empty( apglos_get_setting( 'linkify_enabled' ) ) ) {
 			return;
 		}
-		echo '<style id="apglos-linkify-inline">.apglos-link-note{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}.apglos-ext-icon{display:inline-block;vertical-align:baseline;margin-left:.2em}</style>' . "\n";
+
+		// The always-needed rules: hide the screen-reader note, align the icon.
+		$css = '.apglos-link-note{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}';
+		$css .= '.apglos-ext-icon{display:inline-block;vertical-align:baseline;margin-left:.2em}';
+
+		// The glossary link appearance, from the settings. So the links are
+		// visible by default (underlined) and can be coloured to taste.
+		$settings   = apglos_get_settings();
+		$underline  = ! empty( $settings['linkify_link_underline'] );
+		$color      = isset( $settings['linkify_link_color'] ) ? trim( (string) $settings['linkify_link_color'] ) : '';
+		$hover      = isset( $settings['linkify_link_hover_color'] ) ? trim( (string) $settings['linkify_link_hover_color'] ) : '';
+
+		$link_css = 'text-decoration:' . ( $underline ? 'underline' : 'none' ) . ';';
+		if ( '' !== $color ) {
+			$link_css .= 'color:' . $color . ';';
+		}
+		$css .= '.apglos-glossary-link{' . $link_css . '}';
+
+		if ( '' !== $hover ) {
+			$css .= '.apglos-glossary-link:hover,.apglos-glossary-link:focus{color:' . $hover . ';}';
+		}
+
+		echo '<style id="apglos-linkify-inline">' . $css . '</style>' . "\n"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- colours are hex-sanitised on save; the rest is static.
 	}
 
 	/*
