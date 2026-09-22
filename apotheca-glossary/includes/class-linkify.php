@@ -158,7 +158,7 @@ class Apglos_Linkify {
 		// self-invalidates when the content, settings or glossary change and is
 		// also cleared explicitly on term and post save.
 		$settings = apglos_get_settings();
-		$version  = get_option( 'apglos_terms_version', '0' );
+		$version  = get_option( 'apglos_terms_version', '0' ) . '|' . APGLOS_VERSION;
 		$hash     = md5( $content . '|' . wp_json_encode( $settings ) . '|' . $cap . '|' . $version );
 		$key      = 'apglos_linkify_' . $post_id;
 		$cached   = get_transient( $key );
@@ -558,7 +558,10 @@ class Apglos_Linkify {
 			return $runtime;
 		}
 
-		$version = get_option( 'apglos_terms_version', '0' );
+		// The cache signature includes the plugin version, so a plugin update
+		// refreshes the link dictionary automatically (a files-only update does
+		// not run activation, which is where the manual cache-clear lives).
+		$version = get_option( 'apglos_terms_version', '0' ) . '|' . APGLOS_VERSION;
 		$stored  = get_transient( 'apglos_linkify_dict' );
 		if ( is_array( $stored ) && isset( $stored['version'] ) && $stored['version'] === $version ) {
 			$runtime = $stored;

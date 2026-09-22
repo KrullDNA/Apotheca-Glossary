@@ -3,7 +3,7 @@ Contributors: krulldna
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.5.1
+Stable tag: 1.5.2
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -91,6 +91,9 @@ Attributes (all optional): `show_search`, `show_az_bar`, `show_09`, `show_catego
 * The search field sits in a search landmark, the letter bar is a labelled group, and the letter headings give the page a proper heading structure.
 
 == Changelog ==
+
+= 1.5.2 =
+* The link, dictionary and schema caches are now tied to the plugin version, so updating the plugin refreshes them automatically. Previously a files-only update (which does not run activation) could keep serving the old in-content link format until the plugin was reactivated.
 
 = 1.5.1 =
 * In-content links now scroll to the term with the whole glossary still on screen to browse (with the header offset), instead of filtering everything else out. Filtering everything to one word is what the search box is for; a link should take you to the term in context. The link uses ?apglos_term=slug and the widget finds the term by slug, so it no longer depends on a fixed HTML anchor.
