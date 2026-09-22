@@ -3,7 +3,7 @@ Contributors: krulldna
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.0.5
+Stable tag: 1.1.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -91,6 +91,9 @@ Attributes (all optional): `show_search`, `show_az_bar`, `show_09`, `show_catego
 * The search field sits in a search landmark, the letter bar is a labelled group, and the letter headings give the page a proper heading structure.
 
 == Changelog ==
+
+= 1.1.0 =
+* Added a Glossary page URL setting. When set, in-content links point to that page and scroll to the term (with the anchor offset), so the reader lands on the full glossary and can search other terms, instead of a single-term page. Leave it blank to keep linking to each term's own page. Each entry now carries a stable anchor for this.
 
 = 1.0.5 =
 * Jumping to a related term now stops 100px below the top by default, so a fixed or transparent header no longer covers the term. Added a per-device Anchor offset control in the widget's Layout section to adjust that distance.

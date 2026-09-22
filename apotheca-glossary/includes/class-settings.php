@@ -99,6 +99,7 @@ class Apglos_Settings {
 		);
 
 		$this->add_field( 'glossary_slug', __( 'Glossary URL slug', 'apotheca-glossary' ), 'field_glossary_slug', 'apglos_general_section' );
+		$this->add_field( 'glossary_page_url', __( 'Glossary page URL', 'apotheca-glossary' ), 'field_glossary_page_url', 'apglos_general_section' );
 	}
 
 	/**
@@ -231,6 +232,22 @@ class Apglos_Settings {
 	}
 
 	/**
+	 * Glossary page URL field.
+	 *
+	 * @return void
+	 */
+	public function field_glossary_page_url() {
+		$value = (string) apglos_get_setting( 'glossary_page_url' );
+		printf(
+			'<input type="url" id="glossary_page_url" name="%1$s[glossary_page_url]" value="%2$s" class="regular-text" placeholder="%3$s" />',
+			esc_attr( APGLOS_SETTINGS_OPTION ),
+			esc_attr( $value ),
+			esc_attr( home_url( '/glossary-page/' ) )
+		);
+		echo '<p class="description">' . esc_html__( 'The page where you placed the glossary widget or shortcode. When set, in-content links point to this page and scroll to the term, so the reader lands on the full glossary and can search other terms. Leave blank to link to each term\'s own page instead.', 'apotheca-glossary' ) . '</p>';
+	}
+
+	/**
 	 * Render a single checkbox bound to a boolean setting.
 	 *
 	 * @param string $key   The setting key.
@@ -284,11 +301,20 @@ class Apglos_Settings {
 		}
 		$out['glossary_slug'] = $slug;
 
+		// Glossary page URL, where the widget or shortcode lives.
+		$out['glossary_page_url'] = isset( $input['glossary_page_url'] ) ? esc_url_raw( trim( $input['glossary_page_url'] ) ) : '';
+
 		// If the slug changed, flag a rewrite-rules flush for the next init.
 		$old = apglos_get_settings();
 		if ( ! isset( $old['glossary_slug'] ) || $old['glossary_slug'] !== $slug ) {
 			update_option( 'apglos_needs_flush', '1' );
 		}
+
+		// Settings feed the linkify link targets, so drop the cached link
+		// dictionary and schema set. Per-post link caches carry the settings in
+		// their hash and refresh on their own.
+		delete_transient( 'apglos_linkify_dict' );
+		delete_transient( 'apglos_schema_set' );
 
 		return $out;
 	}
