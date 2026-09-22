@@ -177,6 +177,16 @@
 		}
 
 		/**
+		 * Remove the persistent highlight from any term. Called when the reader
+		 * searches or filters, so the "you are here" highlight does not linger.
+		 */
+		function clearTarget() {
+			for ( var i = 0; i < entries.length; i++ ) {
+				entries[ i ].classList.remove( 'is-target' );
+			}
+		}
+
+		/**
 		 * Decide whether one entry passes all active filters.
 		 */
 		function entryMatches( entry ) {
@@ -211,6 +221,11 @@
 		function apply() {
 			var shown = 0;
 			var visibleByLetter = {};
+
+			// Re-filtering means the reader is browsing, so drop the "you are
+			// here" highlight. The landing and related-link handlers re-apply it
+			// after their own apply() call.
+			clearTarget();
 
 			for ( var i = 0; i < entries.length; i++ ) {
 				var entry = entries[ i ];
@@ -503,10 +518,10 @@
 					}
 					apply();
 					target.scrollIntoView( { behavior: 'smooth', block: 'start' } );
+					// Highlight the new target and keep it highlighted, clearing
+					// any previously highlighted term first.
+					clearTarget();
 					target.classList.add( 'is-target' );
-					window.setTimeout( function () {
-						target.classList.remove( 'is-target' );
-					}, 1600 );
 				} );
 			} )( relatedLinks[ r ] );
 		}
@@ -537,10 +552,12 @@
 	}
 
 	/**
-	 * If the page was opened at ?apglos_term=slug (an in-content glossary link),
-	 * scroll to that term without filtering, so the whole glossary stays on
-	 * screen and the reader lands on the term with the header offset applied.
+	 * If the page was opened at ?apglos_scroll=slug (an in-content glossary
+	 * link), scroll to that term without filtering, so the whole glossary stays
+	 * on screen and the reader lands on the term with the header offset applied.
 	 * The term is found by its slug, so it does not depend on a fixed anchor.
+	 * (The parameter is not named after the post type, or WordPress would render
+	 * the single term instead of the glossary page.)
 	 */
 	function scrollToTermParam() {
 		var params;
@@ -549,7 +566,7 @@
 		} catch ( e ) {
 			return;
 		}
-		var slug = params.get( 'apglos_term' );
+		var slug = params.get( 'apglos_scroll' );
 		if ( ! slug ) {
 			return;
 		}
@@ -558,6 +575,8 @@
 		for ( var i = 0; i < entries.length; i++ ) {
 			if ( entries[ i ].getAttribute( 'data-slug' ) === slug && ! entries[ i ].hidden ) {
 				var target = entries[ i ];
+				// Mark the term so it stays highlighted for the reader.
+				target.classList.add( 'is-target' );
 				// A short delay lets images and fonts above settle first, so the
 				// scroll lands accurately. scroll-margin-top applies the offset.
 				window.setTimeout( function () {

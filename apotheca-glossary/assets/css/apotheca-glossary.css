@@ -235,14 +235,21 @@
 	text-decoration: underline;
 }
 
-/* A brief flash when a related link jumps to a term. */
+/* The term the reader was brought to (from an in-content link or a related
+   term). The highlight stays put so it is clear which term is meant, and clears
+   as soon as they search or filter. The colour is set by the widget's
+   Selected-term control; the box-shadow gives the highlight some breathing room
+   without shifting the layout. */
 .apglos__entry.is-target {
-	animation: apglos-flash 1.6s ease-out;
-}
-
-@keyframes apglos-flash {
-	0% { background: #fff5cc; }
-	100% { background: transparent; }
+	background: var( --apglos-target-bg, #fff5cc );
+	/* The box-shadow paints the same colour as a solid band around the term, so
+	   there is an even gap between the highlight edge and the term content on all
+	   four sides. Using a shadow rather than padding means the highlight can grow
+	   without nudging the surrounding entries or the term text, so nothing shifts
+	   when the reader lands on it. */
+	box-shadow: 0 0 0 0.85rem var( --apglos-target-bg, #fff5cc );
+	border-radius: var( --apglos-target-radius, 4px );
+	transition: background 0.3s ease, box-shadow 0.3s ease;
 }
 
 /* Visible focus states for keyboard users, on every interactive element.

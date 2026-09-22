@@ -100,7 +100,7 @@ class Apglos_Schema {
 	 * @return array
 	 */
 	private function get_defined_term_set() {
-		$version = get_option( 'apglos_terms_version', '0' );
+		$version = get_option( 'apglos_terms_version', '0' ) . '|' . APGLOS_VERSION;
 		$cached  = get_transient( 'apglos_schema_set' );
 		if ( is_array( $cached ) && isset( $cached['version'] ) && $cached['version'] === $version ) {
 			return $cached['data'];

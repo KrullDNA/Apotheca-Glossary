@@ -158,7 +158,7 @@ class Apglos_Linkify {
 		// self-invalidates when the content, settings or glossary change and is
 		// also cleared explicitly on term and post save.
 		$settings = apglos_get_settings();
-		$version  = get_option( 'apglos_terms_version', '0' );
+		$version  = get_option( 'apglos_terms_version', '0' ) . '|' . APGLOS_VERSION;
 		$hash     = md5( $content . '|' . wp_json_encode( $settings ) . '|' . $cap . '|' . $version );
 		$key      = 'apglos_linkify_' . $post_id;
 		$cached   = get_transient( $key );
@@ -558,7 +558,10 @@ class Apglos_Linkify {
 			return $runtime;
 		}
 
-		$version = get_option( 'apglos_terms_version', '0' );
+		// The cache signature includes the plugin version, so a plugin update
+		// refreshes the link dictionary automatically (a files-only update does
+		// not run activation, which is where the manual cache-clear lives).
+		$version = get_option( 'apglos_terms_version', '0' ) . '|' . APGLOS_VERSION;
 		$stored  = get_transient( 'apglos_linkify_dict' );
 		if ( is_array( $stored ) && isset( $stored['version'] ) && $stored['version'] === $version ) {
 			$runtime = $stored;
@@ -578,16 +581,17 @@ class Apglos_Linkify {
 		$phrases = array();
 
 		// When a glossary page URL is set, links open that page and the widget
-		// scrolls to the term (by slug, via ?apglos_term=slug), leaving the whole
-		// glossary on screen to browse, with the header offset respected. This is
-		// robust: the widget finds the term by slug rather than relying on a
-		// fixed HTML anchor being present. Otherwise links go to the term's own
-		// page.
+		// scrolls to the term (by slug, via ?apglos_scroll=slug), leaving the
+		// whole glossary on screen to browse, with the header offset respected.
+		// The parameter is deliberately NOT named after the post type: WordPress
+		// would treat ?apglos_term=slug as a request for that single term and
+		// render it instead of the glossary page. Otherwise links go to the
+		// term's own page.
 		$page_url = trim( (string) apglos_get_setting( 'glossary_page_url' ) );
 
 		foreach ( $posts as $post ) {
 			if ( '' !== $page_url ) {
-				$url = add_query_arg( 'apglos_term', $post->post_name, $page_url );
+				$url = add_query_arg( 'apglos_scroll', $post->post_name, $page_url );
 			} else {
 				$url = get_permalink( $post->ID );
 			}
