@@ -537,10 +537,12 @@
 	}
 
 	/**
-	 * If the page was opened at ?apglos_term=slug (an in-content glossary link),
-	 * scroll to that term without filtering, so the whole glossary stays on
-	 * screen and the reader lands on the term with the header offset applied.
+	 * If the page was opened at ?apglos_scroll=slug (an in-content glossary
+	 * link), scroll to that term without filtering, so the whole glossary stays
+	 * on screen and the reader lands on the term with the header offset applied.
 	 * The term is found by its slug, so it does not depend on a fixed anchor.
+	 * (The parameter is not named after the post type, or WordPress would render
+	 * the single term instead of the glossary page.)
 	 */
 	function scrollToTermParam() {
 		var params;
@@ -549,7 +551,7 @@
 		} catch ( e ) {
 			return;
 		}
-		var slug = params.get( 'apglos_term' );
+		var slug = params.get( 'apglos_scroll' );
 		if ( ! slug ) {
 			return;
 		}

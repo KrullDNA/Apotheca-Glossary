@@ -581,16 +581,17 @@ class Apglos_Linkify {
 		$phrases = array();
 
 		// When a glossary page URL is set, links open that page and the widget
-		// scrolls to the term (by slug, via ?apglos_term=slug), leaving the whole
-		// glossary on screen to browse, with the header offset respected. This is
-		// robust: the widget finds the term by slug rather than relying on a
-		// fixed HTML anchor being present. Otherwise links go to the term's own
-		// page.
+		// scrolls to the term (by slug, via ?apglos_scroll=slug), leaving the
+		// whole glossary on screen to browse, with the header offset respected.
+		// The parameter is deliberately NOT named after the post type: WordPress
+		// would treat ?apglos_term=slug as a request for that single term and
+		// render it instead of the glossary page. Otherwise links go to the
+		// term's own page.
 		$page_url = trim( (string) apglos_get_setting( 'glossary_page_url' ) );
 
 		foreach ( $posts as $post ) {
 			if ( '' !== $page_url ) {
-				$url = add_query_arg( 'apglos_term', $post->post_name, $page_url );
+				$url = add_query_arg( 'apglos_scroll', $post->post_name, $page_url );
 			} else {
 				$url = get_permalink( $post->ID );
 			}
