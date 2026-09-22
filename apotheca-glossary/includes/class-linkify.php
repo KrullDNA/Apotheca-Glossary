@@ -50,6 +50,15 @@ class Apglos_Linkify {
 	const NONCE_ACTION = 'apglos_linkify_meta';
 
 	/**
+	 * Per-post running state within a single request, so the cap and the
+	 * first-occurrence rule hold across several pieces of content (for example
+	 * multiple Elementor Text Editor widgets in one post).
+	 *
+	 * @var array<int, array{links:int, terms:array}>
+	 */
+	private $runs = array();
+
+	/**
 	 * Hook into WordPress.
 	 *
 	 * @return void
@@ -57,6 +66,11 @@ class Apglos_Linkify {
 	public function init() {
 		// The linkify filter, late so shortcodes and wpautop have already run.
 		add_filter( 'the_content', array( $this, 'filter_content' ), 20 );
+
+		// Elementor renders Text Editor widgets without going through
+		// the_content, so linkify them via Elementor's own widget filter. The
+		// hook simply never fires on sites without Elementor.
+		add_filter( 'elementor/widget/render_content', array( $this, 'filter_elementor_widget' ), 20, 2 );
 
 		// Per-post controls (opt out and cap override).
 		add_action( 'add_meta_boxes', array( $this, 'add_meta_box' ) );
@@ -81,52 +95,61 @@ class Apglos_Linkify {
 	 */
 
 	/**
-	 * Linkify glossary terms in post content.
+	 * Whether linkify should run for the current context, and with what cap.
 	 *
-	 * @param string $content The post content.
-	 * @return string
+	 * @param int $post_id The current post id.
+	 * @return int The links cap, or 0 to skip.
 	 */
-	public function filter_content( $content ) {
+	private function context_cap( $post_id ) {
 		// Never in admin, feeds, or REST/editor renders.
 		if ( is_admin() || is_feed() ) {
-			return $content;
+			return 0;
 		}
 		if ( defined( 'REST_REQUEST' ) && REST_REQUEST ) {
-			return $content;
+			return 0;
 		}
 
 		$settings = apglos_get_settings();
 
 		// Ships off: do nothing until switched on.
-		if ( empty( $settings['linkify_enabled'] ) ) {
-			return $content;
-		}
-
-		$post_id = get_the_ID();
-		if ( ! $post_id ) {
-			return $content;
+		if ( empty( $settings['linkify_enabled'] ) || ! $post_id ) {
+			return 0;
 		}
 
 		// Never linkify the glossary itself, or an excluded post type.
 		$post_type = get_post_type( $post_id );
 		if ( APGLOS_POST_TYPE === $post_type ) {
-			return $content;
+			return 0;
 		}
 		if ( in_array( $post_type, (array) $settings['linkify_excluded_post_types'], true ) ) {
-			return $content;
+			return 0;
 		}
 
 		// Per-post opt out.
 		if ( get_post_meta( $post_id, self::META_OPTOUT, true ) ) {
-			return $content;
+			return 0;
 		}
 
-		// Work out the cap: the global default, or a per-post override.
+		// The cap: the global default, or a per-post override.
 		$cap      = (int) $settings['linkify_cap'];
 		$override = get_post_meta( $post_id, self::META_CAP, true );
 		if ( '' !== $override && (int) $override >= 0 ) {
 			$cap = (int) $override;
 		}
+
+		return max( 0, $cap );
+	}
+
+	/**
+	 * Linkify glossary terms in post content (the standard WordPress path:
+	 * classic and block editors, and Elementor's Post Content widget).
+	 *
+	 * @param string $content The post content.
+	 * @return string
+	 */
+	public function filter_content( $content ) {
+		$post_id = get_the_ID();
+		$cap     = $this->context_cap( $post_id );
 		if ( $cap <= 0 ) {
 			return $content;
 		}
@@ -134,10 +157,11 @@ class Apglos_Linkify {
 		// Cache: keyed by post, validated by a hash of the inputs, so it
 		// self-invalidates when the content, settings or glossary change and is
 		// also cleared explicitly on term and post save.
-		$version = get_option( 'apglos_terms_version', '0' );
-		$hash    = md5( $content . '|' . wp_json_encode( $settings ) . '|' . $cap . '|' . $version );
-		$key     = 'apglos_linkify_' . $post_id;
-		$cached  = get_transient( $key );
+		$settings = apglos_get_settings();
+		$version  = get_option( 'apglos_terms_version', '0' );
+		$hash     = md5( $content . '|' . wp_json_encode( $settings ) . '|' . $cap . '|' . $version );
+		$key      = 'apglos_linkify_' . $post_id;
+		$cached   = get_transient( $key );
 
 		if ( is_array( $cached ) && isset( $cached['hash'] ) && $cached['hash'] === $hash ) {
 			return $cached['html'];
@@ -151,20 +175,96 @@ class Apglos_Linkify {
 	}
 
 	/**
-	 * Do the actual linking on a piece of content.
+	 * Linkify glossary terms inside an Elementor Text Editor widget.
+	 *
+	 * Elementor does not pass this text through the_content, so we hook its own
+	 * widget filter. The cap and the first-occurrence rule are shared across
+	 * every text widget in the post via $this->runs, so a post with several
+	 * text widgets still gets at most the cap, each term linked once.
+	 *
+	 * @param string $content The rendered widget HTML.
+	 * @param object $widget  The Elementor widget instance.
+	 * @return string
+	 */
+	public function filter_elementor_widget( $content, $widget ) {
+		// Only the Text Editor widget. The Post Content widget already runs
+		// through the_content, and other widgets carry no prose to link.
+		if ( ! is_object( $widget ) || ! method_exists( $widget, 'get_name' ) || 'text-editor' !== $widget->get_name() ) {
+			return $content;
+		}
+
+		$post_id = get_the_ID();
+		$cap     = $this->context_cap( $post_id );
+		if ( $cap <= 0 ) {
+			return $content;
+		}
+
+		// Start (or continue) this post's shared run.
+		if ( ! isset( $this->runs[ $post_id ] ) ) {
+			$this->runs[ $post_id ] = array( 'links' => 0, 'terms' => array() );
+		}
+		if ( $this->runs[ $post_id ]['links'] >= $cap ) {
+			return $content; // Cap already reached earlier in the post.
+		}
+
+		$dict = $this->get_dictionary();
+		if ( empty( $dict['regex'] ) ) {
+			return $content;
+		}
+
+		$state = array(
+			'links' => $this->runs[ $post_id ]['links'],
+			'cap'   => $cap,
+			'terms' => $this->runs[ $post_id ]['terms'],
+			'dict'  => $dict,
+		);
+
+		$html = $this->transform( $content, $state );
+
+		// Carry the running totals forward to the next widget in this post.
+		$this->runs[ $post_id ]['links'] = $state['links'];
+		$this->runs[ $post_id ]['terms'] = $state['terms'];
+
+		return $html;
+	}
+
+	/**
+	 * Link a piece of content, starting from a clean state (used by the
+	 * the_content path).
 	 *
 	 * @param string $content The content.
 	 * @param int    $cap     Maximum links to add.
 	 * @return string
 	 */
 	private function process( $content, $cap ) {
-		if ( ! class_exists( 'DOMDocument' ) ) {
-			return $content; // Can't parse safely, so leave it alone.
-		}
-
 		$dict = $this->get_dictionary();
 		if ( empty( $dict['regex'] ) ) {
 			return $content;
+		}
+
+		$state = array(
+			'links' => 0,
+			'cap'   => $cap,
+			'terms' => array(), // Slugs already linked (first occurrence only).
+			'dict'  => $dict,
+		);
+
+		return $this->transform( $content, $state );
+	}
+
+	/**
+	 * The DOM transform: parse the HTML, link eligible text, and return it,
+	 * carrying the running link count and linked terms in $state so callers can
+	 * enforce the cap and the first-occurrence rule across several pieces.
+	 *
+	 * @param string $content The content.
+	 * @param array  $state   Running state (by reference), with keys links,
+	 *                        cap, terms and dict.
+	 * @return string
+	 */
+	private function transform( $content, &$state ) {
+		if ( ! class_exists( 'DOMDocument' ) ) {
+			return $content; // Can't parse safely, so leave it alone.
 		}
 
 		libxml_use_internal_errors( true );
@@ -193,13 +293,6 @@ class Apglos_Linkify {
 		if ( ! $root ) {
 			return $content;
 		}
-
-		$state = array(
-			'links' => 0,
-			'cap'   => $cap,
-			'terms' => array(), // Slugs already linked (first occurrence only).
-			'dict'  => $dict,
-		);
 
 		$this->walk( $root, $state, $dom );
 
