@@ -1599,6 +1599,27 @@ class Apglos_Glossary_Widget extends Widget_Base {
 			)
 		);
 
+		$this->add_control(
+			'target_radius',
+			array(
+				'label'      => __( 'Selected term corner radius', 'apotheca-glossary' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'px', 'rem' ),
+				'range'      => array(
+					'px'  => array(
+						'min' => 0,
+						'max' => 30,
+					),
+					'rem' => array(
+						'min'  => 0,
+						'max'  => 2,
+						'step' => 0.1,
+					),
+				),
+				'selectors'  => array( '{{WRAPPER}}' => '--apglos-target-radius: {{SIZE}}{{UNIT}};' ),
+			)
+		);
+
 		$this->end_controls_section();
 	}
 
