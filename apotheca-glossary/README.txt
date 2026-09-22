@@ -3,7 +3,7 @@ Contributors: krulldna
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.1.0
+Stable tag: 1.5.1
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -91,6 +91,21 @@ Attributes (all optional): `show_search`, `show_az_bar`, `show_09`, `show_catego
 * The search field sits in a search landmark, the letter bar is a labelled group, and the letter headings give the page a proper heading structure.
 
 == Changelog ==
+
+= 1.5.1 =
+* In-content links now scroll to the term with the whole glossary still on screen to browse (with the header offset), instead of filtering everything else out. Filtering everything to one word is what the search box is for; a link should take you to the term in context. The link uses ?apglos_term=slug and the widget finds the term by slug, so it no longer depends on a fixed HTML anchor.
+
+= 1.5.0 =
+* In-content links now open the glossary page as a search (?q=Term) instead of jumping to a term anchor. The widget filters to the term and highlights it, with the reader landing on the full glossary to explore, and it no longer depends on fragile anchor markup or on the glossary being the first element on the page. Every glossary on a page now reads the URL query, and a term arriving in the URL is active whatever its length.
+
+= 1.4.0 =
+* Added glossary link appearance controls to the settings page: underline (on by default, so the links are visible), a link colour and a hover colour. Leaving the colours blank keeps the surrounding text colour.
+
+= 1.3.0 =
+* In-content linking now also works inside JetEngine (and Elementor) dynamic field widgets, which many themes use to render body copy. A short-field guard means small fields like a date, a reading time or a single tag are left alone, only real body copy is linked. A new "Link inside dynamic fields" setting (on by default) controls it, and the linkable widget list and the minimum field length are both filterable.
+
+= 1.2.0 =
+* In-content linking now also works inside Elementor Text Editor widgets. Elementor renders those without WordPress's standard content filter, so glossary links were not being added to pages built that way. Linking now runs on Text Editor widget output too, with the per-post link cap and the first-occurrence rule shared across every text widget in the post.
 
 = 1.1.0 =
 * Added a Glossary page URL setting. When set, in-content links point to that page and scroll to the term (with the anchor offset), so the reader lands on the full glossary and can search other terms, instead of a single-term page. Leave it blank to keep linking to each term's own page. Each entry now carries a stable anchor for this.

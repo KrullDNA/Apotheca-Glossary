@@ -88,6 +88,10 @@ class Apglos_Settings {
 		$this->add_field( 'linkify_new_tab', __( 'Open links in a new tab', 'apotheca-glossary' ), 'field_linkify_new_tab', 'apglos_linkify_section' );
 		$this->add_field( 'linkify_new_tab_note', __( 'New-tab note for screen readers', 'apotheca-glossary' ), 'field_linkify_new_tab_note', 'apglos_linkify_section' );
 		$this->add_field( 'linkify_external_icon', __( 'External-link icon', 'apotheca-glossary' ), 'field_linkify_external_icon', 'apglos_linkify_section' );
+		$this->add_field( 'linkify_dynamic_fields', __( 'Link inside dynamic fields', 'apotheca-glossary' ), 'field_linkify_dynamic_fields', 'apglos_linkify_section' );
+		$this->add_field( 'linkify_link_underline', __( 'Underline links', 'apotheca-glossary' ), 'field_link_underline', 'apglos_linkify_section' );
+		$this->add_field( 'linkify_link_color', __( 'Link colour', 'apotheca-glossary' ), 'field_link_color', 'apglos_linkify_section' );
+		$this->add_field( 'linkify_link_hover_color', __( 'Link hover colour', 'apotheca-glossary' ), 'field_link_hover_color', 'apglos_linkify_section' );
 		$this->add_field( 'linkify_excluded_post_types', __( 'Do not link in these post types', 'apotheca-glossary' ), 'field_excluded_post_types', 'apglos_linkify_section' );
 
 		// General section.
@@ -189,6 +193,78 @@ class Apglos_Settings {
 	}
 
 	/**
+	 * Link-inside-dynamic-fields field.
+	 *
+	 * @return void
+	 */
+	public function field_linkify_dynamic_fields() {
+		$this->checkbox( 'linkify_dynamic_fields', __( 'Also add links inside dynamic field widgets (for pages built with JetEngine or Elementor dynamic fields, not just the classic editor)', 'apotheca-glossary' ) );
+	}
+
+	/**
+	 * Underline links field.
+	 *
+	 * @return void
+	 */
+	public function field_link_underline() {
+		$this->checkbox( 'linkify_link_underline', __( 'Underline glossary links so they are visible as links', 'apotheca-glossary' ) );
+	}
+
+	/**
+	 * Link colour field.
+	 *
+	 * @return void
+	 */
+	public function field_link_color() {
+		$this->color_field( 'linkify_link_color', __( 'Leave blank to use the surrounding text colour.', 'apotheca-glossary' ) );
+	}
+
+	/**
+	 * Link hover colour field.
+	 *
+	 * @return void
+	 */
+	public function field_link_hover_color() {
+		$this->color_field( 'linkify_link_hover_color', __( 'Leave blank to keep the link colour on hover.', 'apotheca-glossary' ) );
+	}
+
+	/**
+	 * Add a leading # to a hex colour if the user left it off, so
+	 * sanitize_hex_color accepts it. Returns '' for anything empty.
+	 *
+	 * @param string $value The raw value.
+	 * @return string
+	 */
+	private function normalise_hex( $value ) {
+		$value = trim( (string) $value );
+		if ( '' === $value ) {
+			return '';
+		}
+		if ( '#' !== $value[0] ) {
+			$value = '#' . $value;
+		}
+		return $value;
+	}
+
+	/**
+	 * Render a hex colour text field bound to a setting.
+	 *
+	 * @param string $key         The setting key.
+	 * @param string $description The help text.
+	 * @return void
+	 */
+	private function color_field( $key, $description ) {
+		$value = (string) apglos_get_setting( $key );
+		printf(
+			'<input type="text" id="%1$s" name="%2$s[%1$s]" value="%3$s" class="regular-text" placeholder="#e13172" pattern="#?[A-Fa-f0-9]{3,8}" />',
+			esc_attr( $key ),
+			esc_attr( APGLOS_SETTINGS_OPTION ),
+			esc_attr( $value )
+		);
+		echo '<p class="description">' . esc_html( $description ) . '</p>';
+	}
+
+	/**
 	 * Excluded post types field.
 	 *
 	 * @return void
@@ -283,9 +359,15 @@ class Apglos_Settings {
 
 		$out['linkify_enabled']       = ! empty( $input['linkify_enabled'] );
 		$out['linkify_cap']           = isset( $input['linkify_cap'] ) ? max( 0, absint( $input['linkify_cap'] ) ) : 3;
-		$out['linkify_new_tab']       = ! empty( $input['linkify_new_tab'] );
-		$out['linkify_new_tab_note']  = ! empty( $input['linkify_new_tab_note'] );
-		$out['linkify_external_icon'] = ! empty( $input['linkify_external_icon'] );
+		$out['linkify_new_tab']        = ! empty( $input['linkify_new_tab'] );
+		$out['linkify_new_tab_note']   = ! empty( $input['linkify_new_tab_note'] );
+		$out['linkify_external_icon']  = ! empty( $input['linkify_external_icon'] );
+		$out['linkify_dynamic_fields'] = ! empty( $input['linkify_dynamic_fields'] );
+
+		// Link appearance.
+		$out['linkify_link_underline']   = ! empty( $input['linkify_link_underline'] );
+		$out['linkify_link_color']       = isset( $input['linkify_link_color'] ) ? (string) sanitize_hex_color( $this->normalise_hex( $input['linkify_link_color'] ) ) : '';
+		$out['linkify_link_hover_color'] = isset( $input['linkify_link_hover_color'] ) ? (string) sanitize_hex_color( $this->normalise_hex( $input['linkify_link_hover_color'] ) ) : '';
 
 		// Excluded post types: keep only real, public ones.
 		$submitted = isset( $input['linkify_excluded_post_types'] ) ? (array) $input['linkify_excluded_post_types'] : array();

@@ -314,11 +314,12 @@
 
 		/**
 		 * Read any starting state out of the URL.
+		 *
+		 * Every instance reads it (not just the URL owner), so an in-content
+		 * link that opens the glossary at ?q=term filters whichever glossary is
+		 * on the page.
 		 */
 		function readUrl() {
-			if ( ! ownsUrl ) {
-				return;
-			}
 			var params = new URLSearchParams( window.location.search );
 
 			var q = params.get( 'q' );
@@ -326,12 +327,13 @@
 			var cat = params.get( 'cat' );
 
 			if ( q ) {
-				// Prefill the box, but only treat it as an active search once it
-				// meets the minimum length.
+				// A query arriving in the URL is an intentional deep link, so it
+				// is active whatever its length (unlike live typing, which waits
+				// for the minimum).
 				if ( searchInput ) {
 					searchInput.value = q;
 				}
-				state.q = ( q.trim().length >= MIN_SEARCH ) ? q.trim() : '';
+				state.q = q.trim();
 			}
 			if ( letter ) {
 				// Only accept a letter the bar actually offers.
@@ -535,6 +537,38 @@
 	}
 
 	/**
+	 * If the page was opened at ?apglos_term=slug (an in-content glossary link),
+	 * scroll to that term without filtering, so the whole glossary stays on
+	 * screen and the reader lands on the term with the header offset applied.
+	 * The term is found by its slug, so it does not depend on a fixed anchor.
+	 */
+	function scrollToTermParam() {
+		var params;
+		try {
+			params = new URLSearchParams( window.location.search );
+		} catch ( e ) {
+			return;
+		}
+		var slug = params.get( 'apglos_term' );
+		if ( ! slug ) {
+			return;
+		}
+
+		var entries = document.querySelectorAll( '[data-apglos-entry]' );
+		for ( var i = 0; i < entries.length; i++ ) {
+			if ( entries[ i ].getAttribute( 'data-slug' ) === slug && ! entries[ i ].hidden ) {
+				var target = entries[ i ];
+				// A short delay lets images and fonts above settle first, so the
+				// scroll lands accurately. scroll-margin-top applies the offset.
+				window.setTimeout( function () {
+					target.scrollIntoView( { block: 'start' } );
+				}, 80 );
+				return;
+			}
+		}
+	}
+
+	/**
 	 * Boot every glossary currently on the page.
 	 */
 	function boot() {
@@ -543,6 +577,7 @@
 			initGlossary( roots[ i ] );
 		}
 		scrollToHashTerm();
+		scrollToTermParam();
 	}
 
 	/**

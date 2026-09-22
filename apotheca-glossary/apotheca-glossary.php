@@ -3,7 +3,7 @@
  * Plugin Name:       Apotheca® Glossary
  * Plugin URI:        https://apothecacosmetics.com/
  * Description:        A searchable, filterable glossary of cosmetic terminology, with automatic in-content linking of glossary terms in blog posts.
- * Version:           1.1.0
+ * Version:           1.5.1
  * Requires at least: 6.0
  * Requires PHP:      7.4
  * Author:            Krull Design & Advertising
@@ -28,7 +28,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * means the version number, paths and URLs live in a single place.
  */
 
-define( 'APGLOS_VERSION', '1.1.0' );
+define( 'APGLOS_VERSION', '1.5.1' );
 define( 'APGLOS_FILE', __FILE__ );
 define( 'APGLOS_PATH', plugin_dir_path( __FILE__ ) );
 define( 'APGLOS_URL', plugin_dir_url( __FILE__ ) );
@@ -64,6 +64,11 @@ function apglos_default_settings() {
 		'linkify_new_tab_note'        => true,  // Hidden "opens in a new tab" note.
 		'linkify_external_icon'       => false, // Optional external-link icon.
 		'linkify_excluded_post_types' => array(), // Global post type exclusions.
+		'linkify_dynamic_fields'      => true,  // Link inside JetEngine dynamic fields.
+		// Glossary link appearance in content.
+		'linkify_link_underline'      => true,  // Underline the links so they are visible.
+		'linkify_link_color'          => '',    // Link colour; empty inherits the text colour.
+		'linkify_link_hover_color'    => '',    // Hover colour; empty keeps the link colour.
 		'glossary_slug'               => 'glossary',
 		// The page that holds the glossary widget/shortcode. When set, in-content
 		// links point here and scroll to the term, instead of the term's own page.
@@ -188,6 +193,13 @@ function apglos_activate() {
 
 	// Rebuild permalinks so /glossary/ and /glossary-category/ resolve.
 	flush_rewrite_rules();
+
+	// Bump the terms version and drop the linkify and schema caches, so any
+	// change to how links are built (for example the link target) takes effect
+	// on the next page view rather than serving stale cached output.
+	update_option( 'apglos_terms_version', (string) microtime( true ) );
+	delete_transient( 'apglos_linkify_dict' );
+	delete_transient( 'apglos_schema_set' );
 
 	// If Elementor is active, clear its cached CSS so the widget's styles,
 	// including the search highlight, are regenerated with this version's
