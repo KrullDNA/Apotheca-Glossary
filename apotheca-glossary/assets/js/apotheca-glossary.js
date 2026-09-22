@@ -314,11 +314,12 @@
 
 		/**
 		 * Read any starting state out of the URL.
+		 *
+		 * Every instance reads it (not just the URL owner), so an in-content
+		 * link that opens the glossary at ?q=term filters whichever glossary is
+		 * on the page.
 		 */
 		function readUrl() {
-			if ( ! ownsUrl ) {
-				return;
-			}
 			var params = new URLSearchParams( window.location.search );
 
 			var q = params.get( 'q' );
@@ -326,12 +327,13 @@
 			var cat = params.get( 'cat' );
 
 			if ( q ) {
-				// Prefill the box, but only treat it as an active search once it
-				// meets the minimum length.
+				// A query arriving in the URL is an intentional deep link, so it
+				// is active whatever its length (unlike live typing, which waits
+				// for the minimum).
 				if ( searchInput ) {
 					searchInput.value = q;
 				}
-				state.q = ( q.trim().length >= MIN_SEARCH ) ? q.trim() : '';
+				state.q = q.trim();
 			}
 			if ( letter ) {
 				// Only accept a letter the bar actually offers.

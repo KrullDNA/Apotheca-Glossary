@@ -3,7 +3,7 @@ Contributors: krulldna
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.4.0
+Stable tag: 1.5.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -91,6 +91,9 @@ Attributes (all optional): `show_search`, `show_az_bar`, `show_09`, `show_catego
 * The search field sits in a search landmark, the letter bar is a labelled group, and the letter headings give the page a proper heading structure.
 
 == Changelog ==
+
+= 1.5.0 =
+* In-content links now open the glossary page as a search (?q=Term) instead of jumping to a term anchor. The widget filters to the term and highlights it, with the reader landing on the full glossary to explore, and it no longer depends on fragile anchor markup or on the glossary being the first element on the page. Every glossary on a page now reads the URL query, and a term arriving in the URL is active whatever its length.
 
 = 1.4.0 =
 * Added glossary link appearance controls to the settings page: underline (on by default, so the links are visible), a link colour and a hover colour. Leaving the colours blank keeps the surrounding text colour.

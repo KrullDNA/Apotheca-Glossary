@@ -577,15 +577,16 @@ class Apglos_Linkify {
 		$map     = array();
 		$phrases = array();
 
-		// When a glossary page URL is set, links point there and scroll to the
-		// term (via the stable anchor the renderer gives each entry), so the
-		// reader lands on the full glossary. Otherwise they go to the term's
-		// own page.
+		// When a glossary page URL is set, links open that page with the term as
+		// a search (?q=Term), so the widget filters to it and highlights it,
+		// with the reader landing on the full glossary to explore. This is more
+		// robust than an anchor, which depends on the exact markup being present.
+		// Otherwise links go to the term's own page.
 		$page_url = trim( (string) apglos_get_setting( 'glossary_page_url' ) );
 
 		foreach ( $posts as $post ) {
 			if ( '' !== $page_url ) {
-				$url = rtrim( $page_url, '#' ) . '#apglos-term-' . $post->post_name;
+				$url = add_query_arg( 'q', $post->post_title, $page_url );
 			} else {
 				$url = get_permalink( $post->ID );
 			}
