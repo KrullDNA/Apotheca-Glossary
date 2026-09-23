@@ -557,7 +557,7 @@
 			'--apglos-totop-bottom', '--apglos-totop-right', '--apglos-totop-size',
 			'--apglos-totop-icon-size', '--apglos-totop-radius', '--apglos-totop-bg',
 			'--apglos-totop-bg-hover', '--apglos-totop-color', '--apglos-totop-color-hover',
-			'--apglos-totop-border-width', '--apglos-totop-border-color', '--apglos-anchor-offset'
+			'--apglos-totop-border-width', '--apglos-totop-border-color'
 		];
 		var cs = window.getComputedStyle( root );
 		for ( var i = 0; i < vars.length; i++ ) {
@@ -595,6 +595,16 @@
 		}
 
 		copyToTopVars( root, button );
+
+		// Pin the button's box-shadow inline before the move. Elementor's Box
+		// Shadow control styles the button through the wrapper selector, which no
+		// longer matches once the button is on the body, so we capture the applied
+		// shadow (the control's value, or the CSS default) and keep it.
+		var shadow = window.getComputedStyle( button ).boxShadow;
+		if ( shadow && 'none' !== shadow ) {
+			button.style.boxShadow = shadow;
+		}
+
 		document.body.appendChild( button );
 
 		// Keep the per-device offsets current through orientation/breakpoint
@@ -610,22 +620,12 @@
 			} );
 		} );
 
-		// Click: scroll to the top of the glossary (its search/controls), honouring
-		// the header offset, so the reader lands on the search rather than the
-		// page's hero.
+		// Click: scroll all the way back to the top of the page.
 		button.addEventListener( 'click', function () {
-			var offset = parseInt( window.getComputedStyle( root ).getPropertyValue( '--apglos-anchor-offset' ), 10 );
-			if ( isNaN( offset ) ) {
-				offset = 0;
-			}
-			var y = root.getBoundingClientRect().top + window.pageYOffset - offset;
-			if ( y < 0 ) {
-				y = 0;
-			}
 			try {
-				window.scrollTo( { top: y, behavior: 'smooth' } );
+				window.scrollTo( { top: 0, behavior: 'smooth' } );
 			} catch ( e ) {
-				window.scrollTo( 0, y );
+				window.scrollTo( 0, 0 );
 			}
 		} );
 

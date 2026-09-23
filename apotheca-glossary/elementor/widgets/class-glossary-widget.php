@@ -1824,6 +1824,14 @@ class Apglos_Glossary_Widget extends Widget_Base {
 			)
 		);
 
+		$this->add_group_control(
+			Group_Control_Box_Shadow::get_type(),
+			array(
+				'name'     => 'to_top_shadow',
+				'selector' => '{{WRAPPER}} .apglos__to-top',
+			)
+		);
+
 		// ---- Icon --------------------------------------------------------
 		$this->add_control(
 			'to_top_icon_heading',

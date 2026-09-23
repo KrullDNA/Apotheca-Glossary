@@ -3,7 +3,7 @@ Contributors: krulldna
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.7.0
+Stable tag: 1.7.1
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -91,6 +91,9 @@ Attributes (all optional): `show_search`, `show_az_bar`, `show_09`, `show_catego
 * The search field sits in a search landmark, the letter bar is a labelled group, and the letter headings give the page a proper heading structure.
 
 == Changelog ==
+
+= 1.7.1 =
+* The Back to top button now scrolls right to the top of the page. Added a Box shadow control to its style section, carried across when the button is moved to the body so the chosen shadow is kept.
 
 = 1.7.0 =
 * Added an optional floating Back to top button, fixed to the bottom right of the browser, that fades in once the reader scrolls down and returns them to the glossary's search. It ships switched off, under Elements. The button is moved to the page body at load so a transformed section cannot break its fixed position. A Back to top button style section adds per-device distance from the bottom and from the right, plus button size, corner radius, background and border colours (normal and hover), and icon size and colour (normal and hover). Also available via the shortcode with show_to_top="yes".
