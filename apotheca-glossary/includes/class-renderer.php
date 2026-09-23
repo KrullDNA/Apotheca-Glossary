@@ -54,6 +54,8 @@ class Apglos_Renderer {
 			'show_category_label' => false,
 			'show_also_known_as'  => false,
 			'show_related'        => false,
+			// A floating "back to top" button, off by default.
+			'show_to_top'         => false,
 			// Behaviour and labels.
 			'empty_letters'       => 'grey', // 'grey' or 'hide'.
 			'category'            => '',      // Limit to one category slug; empty = all.
@@ -61,6 +63,7 @@ class Apglos_Renderer {
 			'aka_label'           => __( 'Also known as:', 'apotheca-glossary' ),
 			'related_label'       => __( 'Related:', 'apotheca-glossary' ),
 			'clear_label'         => __( 'Clear all', 'apotheca-glossary' ),
+			'to_top_label'        => __( 'Back to top', 'apotheca-glossary' ),
 			'empty_message'       => __( 'No terms match your search.', 'apotheca-glossary' ),
 			// Editor-only preview state: '' (default), 'searching' or 'no_results'.
 			// The widget only ever sets this inside the Elementor editor; it is
@@ -340,7 +343,7 @@ class Apglos_Renderer {
 		$settings = wp_parse_args( $args, self::defaults() );
 
 		// Coerce the toggles to real booleans (shortcode atts arrive as strings).
-		foreach ( array( 'show_search', 'show_az_bar', 'show_09', 'show_category', 'show_count', 'show_headings', 'show_category_label', 'show_also_known_as', 'show_related' ) as $key ) {
+		foreach ( array( 'show_search', 'show_az_bar', 'show_09', 'show_category', 'show_count', 'show_headings', 'show_category_label', 'show_also_known_as', 'show_related', 'show_to_top' ) as $key ) {
 			$settings[ $key ] = self::to_bool( $settings[ $key ] );
 		}
 
@@ -499,6 +502,24 @@ class Apglos_Renderer {
 					<?php echo esc_html( $settings['empty_message'] ); ?>
 				</p>
 			</div>
+
+			<?php
+			// The floating "back to top" button. Rendered here inside the wrapper
+			// so it inherits the widget's style variables; the JavaScript then
+			// moves it to the page body so a transformed ancestor cannot break its
+			// fixed positioning, and shows it once the reader has scrolled down.
+			if ( $settings['show_to_top'] ) :
+				?>
+				<button type="button" class="apglos__to-top" data-apglos-to-top aria-label="<?php echo esc_attr( $settings['to_top_label'] ); ?>" title="<?php echo esc_attr( $settings['to_top_label'] ); ?>">
+					<svg class="apglos__to-top-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+						<path d="M12 19V6" />
+						<path d="M6 12l6-6 6 6" />
+					</svg>
+					<span class="screen-reader-text"><?php echo esc_html( $settings['to_top_label'] ); ?></span>
+				</button>
+				<?php
+			endif;
+			?>
 		</div>
 		<?php
 		return ob_get_clean();
