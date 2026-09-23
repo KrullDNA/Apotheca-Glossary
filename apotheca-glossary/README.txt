@@ -3,7 +3,7 @@ Contributors: krulldna
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.6.1
+Stable tag: 1.7.0
 License: GPL-2.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -81,7 +81,7 @@ Yes. Each post has a Glossary linking box with an opt-out checkbox and a per-pos
 
 `[apotheca_glossary]`
 
-Attributes (all optional): `show_search`, `show_az_bar`, `show_09`, `show_category`, `show_count`, `show_headings`, `show_category_label`, `show_also_known_as`, `show_related` (yes or no); `empty_letters` (grey or hide); `category` (a category slug, to limit the glossary to one category); and the text labels `search_placeholder`, `aka_label`, `related_label`, `clear_label` and `empty_message`.
+Attributes (all optional): `show_search`, `show_az_bar`, `show_09`, `show_category`, `show_count`, `show_headings`, `show_category_label`, `show_also_known_as`, `show_related`, `show_to_top` (yes or no); `empty_letters` (grey or hide); `category` (a category slug, to limit the glossary to one category); and the text labels `search_placeholder`, `aka_label`, `related_label`, `clear_label`, `to_top_label` and `empty_message`.
 
 == Accessibility ==
 
@@ -91,6 +91,9 @@ Attributes (all optional): `show_search`, `show_az_bar`, `show_09`, `show_catego
 * The search field sits in a search landmark, the letter bar is a labelled group, and the letter headings give the page a proper heading structure.
 
 == Changelog ==
+
+= 1.7.0 =
+* Added an optional floating Back to top button, fixed to the bottom right of the browser, that fades in once the reader scrolls down and returns them to the glossary's search. It ships switched off, under Elements. The button is moved to the page body at load so a transformed section cannot break its fixed position. A Back to top button style section adds per-device distance from the bottom and from the right, plus button size, corner radius, background and border colours (normal and hover), and icon size and colour (normal and hover). Also available via the shortcode with show_to_top="yes".
 
 = 1.6.1 =
 * The selected term highlight now has a comfortable, even gap on all four sides between the colour and the term, so the highlighted term has room to breathe. Added a Selected term corner radius control to the widget's Search highlight section, so the highlight's rounded corners can be adjusted or squared off.

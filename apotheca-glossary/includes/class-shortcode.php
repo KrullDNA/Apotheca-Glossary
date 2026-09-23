@@ -60,12 +60,14 @@ class Apglos_Shortcode {
 				'show_category_label' => $defaults['show_category_label'] ? '1' : '0',
 				'show_also_known_as'  => $defaults['show_also_known_as'] ? '1' : '0',
 				'show_related'        => $defaults['show_related'] ? '1' : '0',
+				'show_to_top'         => $defaults['show_to_top'] ? '1' : '0',
 				'empty_letters'       => $defaults['empty_letters'],
 				'category'            => $defaults['category'],
 				'search_placeholder'  => $defaults['search_placeholder'],
 				'aka_label'           => $defaults['aka_label'],
 				'related_label'       => $defaults['related_label'],
 				'clear_label'         => $defaults['clear_label'],
+				'to_top_label'        => $defaults['to_top_label'],
 				'empty_message'       => $defaults['empty_message'],
 			),
 			$atts,
@@ -80,6 +82,7 @@ class Apglos_Shortcode {
 		$atts['aka_label']          = sanitize_text_field( $atts['aka_label'] );
 		$atts['related_label']      = sanitize_text_field( $atts['related_label'] );
 		$atts['clear_label']        = sanitize_text_field( $atts['clear_label'] );
+		$atts['to_top_label']       = sanitize_text_field( $atts['to_top_label'] );
 		$atts['empty_message']      = sanitize_text_field( $atts['empty_message'] );
 
 		return Apglos_Renderer::render( $atts );

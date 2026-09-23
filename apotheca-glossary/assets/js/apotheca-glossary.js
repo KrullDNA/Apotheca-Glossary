@@ -19,6 +19,10 @@
 	// characters have been typed. Fewer than this is treated as no search.
 	var MIN_SEARCH = 3;
 
+	// How far the reader must scroll (in pixels) before the "back to top" button
+	// fades in.
+	var TO_TOP_THRESHOLD = 300;
+
 	// Only the first instance on a page claims the URL, so instances never
 	// fight over the query string.
 	var urlClaimed = false;
@@ -526,9 +530,125 @@
 			} )( relatedLinks[ r ] );
 		}
 
+		// The floating "back to top" button, if the widget rendered one.
+		setupToTop( root );
+
 		// ---- Go ---------------------------------------------------------
 		readUrl();
 		apply();
+	}
+
+	/**
+	 * Whether we are inside the Elementor editor. There the button is left in
+	 * place and inert, so it does not float over the editing canvas.
+	 */
+	function isElementorEditor() {
+		return !! ( window.elementorFrontend && window.elementorFrontend.isEditMode && window.elementorFrontend.isEditMode() );
+	}
+
+	/**
+	 * Copy the button's style custom properties from the glossary wrapper onto
+	 * the button itself. The button is moved out of the wrapper to the page body,
+	 * so it can no longer inherit these; copying keeps the widget's styling and,
+	 * done again on resize, keeps the per-device offsets in step.
+	 */
+	function copyToTopVars( root, button ) {
+		var vars = [
+			'--apglos-totop-bottom', '--apglos-totop-right', '--apglos-totop-size',
+			'--apglos-totop-icon-size', '--apglos-totop-radius', '--apglos-totop-bg',
+			'--apglos-totop-bg-hover', '--apglos-totop-color', '--apglos-totop-color-hover',
+			'--apglos-totop-border-width', '--apglos-totop-border-color', '--apglos-anchor-offset'
+		];
+		var cs = window.getComputedStyle( root );
+		for ( var i = 0; i < vars.length; i++ ) {
+			var val = cs.getPropertyValue( vars[ i ] );
+			if ( val && val.trim() ) {
+				button.style.setProperty( vars[ i ], val.trim() );
+			}
+		}
+	}
+
+	/**
+	 * Wire up the floating "back to top" button for a glossary instance: move it
+	 * to the body (so its fixed position is relative to the viewport, whatever
+	 * ancestor transforms Elementor adds), reveal it once the reader has scrolled
+	 * down, and scroll back to the glossary's controls on click.
+	 */
+	function setupToTop( root ) {
+		var button = root.querySelector( '[data-apglos-to-top]' );
+		if ( ! button ) {
+			return;
+		}
+
+		// Leave it untouched inside the Elementor editor.
+		if ( isElementorEditor() ) {
+			return;
+		}
+
+		// Only one floating button per page. If another glossary already placed
+		// one, drop this duplicate rather than stacking a second in the corner.
+		if ( document.querySelector( 'body > [data-apglos-to-top]' ) ) {
+			if ( button.parentNode ) {
+				button.parentNode.removeChild( button );
+			}
+			return;
+		}
+
+		copyToTopVars( root, button );
+		document.body.appendChild( button );
+
+		// Keep the per-device offsets current through orientation/breakpoint
+		// changes after the move.
+		var resizeTick = null;
+		window.addEventListener( 'resize', function () {
+			if ( resizeTick ) {
+				return;
+			}
+			resizeTick = window.requestAnimationFrame( function () {
+				resizeTick = null;
+				copyToTopVars( root, button );
+			} );
+		} );
+
+		// Click: scroll to the top of the glossary (its search/controls), honouring
+		// the header offset, so the reader lands on the search rather than the
+		// page's hero.
+		button.addEventListener( 'click', function () {
+			var offset = parseInt( window.getComputedStyle( root ).getPropertyValue( '--apglos-anchor-offset' ), 10 );
+			if ( isNaN( offset ) ) {
+				offset = 0;
+			}
+			var y = root.getBoundingClientRect().top + window.pageYOffset - offset;
+			if ( y < 0 ) {
+				y = 0;
+			}
+			try {
+				window.scrollTo( { top: y, behavior: 'smooth' } );
+			} catch ( e ) {
+				window.scrollTo( 0, y );
+			}
+		} );
+
+		// Reveal once scrolled past the threshold.
+		var visible = false;
+		var scrollTick = null;
+		function update() {
+			var show = window.pageYOffset > TO_TOP_THRESHOLD;
+			if ( show !== visible ) {
+				visible = show;
+				button.classList.toggle( 'is-visible', show );
+			}
+		}
+		window.addEventListener( 'scroll', function () {
+			if ( scrollTick ) {
+				return;
+			}
+			scrollTick = window.requestAnimationFrame( function () {
+				scrollTick = null;
+				update();
+			} );
+		}, { passive: true } );
+		update();
 	}
 
 	/**

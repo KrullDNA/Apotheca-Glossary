@@ -139,6 +139,7 @@ class Apglos_Glossary_Widget extends Widget_Base {
 		$this->section_style_entry_spacing();
 		$this->section_style_highlight();
 		$this->section_style_empty();
+		$this->section_style_to_top();
 	}
 
 	/*
@@ -171,6 +172,7 @@ class Apglos_Glossary_Widget extends Widget_Base {
 			'show_category_label' => array( __( 'Category label', 'apotheca-glossary' ), '' ),
 			'show_also_known_as'  => array( __( 'Also known as', 'apotheca-glossary' ), '' ),
 			'show_related'        => array( __( 'Related terms', 'apotheca-glossary' ), '' ),
+			'show_to_top'         => array( __( 'Back to top button', 'apotheca-glossary' ), '' ),
 		);
 
 		foreach ( $toggles as $id => $conf ) {
@@ -264,6 +266,17 @@ class Apglos_Glossary_Widget extends Widget_Base {
 				'label'   => __( 'No results message', 'apotheca-glossary' ),
 				'type'    => Controls_Manager::TEXT,
 				'default' => __( 'No terms match your search.', 'apotheca-glossary' ),
+			)
+		);
+
+		$this->add_control(
+			'to_top_label',
+			array(
+				'label'       => __( 'Back to top label', 'apotheca-glossary' ),
+				'type'        => Controls_Manager::TEXT,
+				'default'     => __( 'Back to top', 'apotheca-glossary' ),
+				'description' => __( 'Read out to screen readers and shown on hover. The button itself shows an arrow icon.', 'apotheca-glossary' ),
+				'condition'   => array( 'show_to_top' => 'yes' ),
 			)
 		);
 
@@ -1679,6 +1692,181 @@ class Apglos_Glossary_Widget extends Widget_Base {
 		$this->end_controls_section();
 	}
 
+	/**
+	 * Style: the floating "back to top" button and its icon.
+	 *
+	 * Every control writes a CSS custom property on the widget wrapper rather
+	 * than styling the button directly, because the front-end script moves the
+	 * button out to the page body (so its fixed position beats any ancestor
+	 * transform) and carries these properties across with it.
+	 *
+	 * @return void
+	 */
+	private function section_style_to_top() {
+		$this->start_controls_section(
+			'style_to_top',
+			array(
+				'label'     => __( 'Back to top button', 'apotheca-glossary' ),
+				'tab'       => Controls_Manager::TAB_STYLE,
+				'condition' => array( 'show_to_top' => 'yes' ),
+			)
+		);
+
+		// ---- Position ----------------------------------------------------
+		$this->add_control(
+			'to_top_position_heading',
+			array(
+				'label' => __( 'Position', 'apotheca-glossary' ),
+				'type'  => Controls_Manager::HEADING,
+			)
+		);
+
+		$this->add_responsive_control(
+			'to_top_bottom',
+			array(
+				'label'       => __( 'Distance from bottom', 'apotheca-glossary' ),
+				'type'        => Controls_Manager::SLIDER,
+				'size_units'  => array( 'px', 'rem', 'em' ),
+				'range'       => array( 'px' => array( 'min' => 0, 'max' => 200 ) ),
+				'default'     => array( 'unit' => 'px', 'size' => 24 ),
+				'selectors'   => array( '{{WRAPPER}}' => '--apglos-totop-bottom: {{SIZE}}{{UNIT}};' ),
+				'description' => __( 'How far up from the bottom of the browser the button sits. Set it per device.', 'apotheca-glossary' ),
+			)
+		);
+
+		$this->add_responsive_control(
+			'to_top_right',
+			array(
+				'label'       => __( 'Distance from right', 'apotheca-glossary' ),
+				'type'        => Controls_Manager::SLIDER,
+				'size_units'  => array( 'px', 'rem', 'em' ),
+				'range'       => array( 'px' => array( 'min' => 0, 'max' => 200 ) ),
+				'default'     => array( 'unit' => 'px', 'size' => 24 ),
+				'selectors'   => array( '{{WRAPPER}}' => '--apglos-totop-right: {{SIZE}}{{UNIT}};' ),
+				'description' => __( 'How far in from the right edge of the browser the button sits. Set it per device.', 'apotheca-glossary' ),
+			)
+		);
+
+		// ---- Button ------------------------------------------------------
+		$this->add_control(
+			'to_top_button_heading',
+			array(
+				'label'     => __( 'Button', 'apotheca-glossary' ),
+				'type'      => Controls_Manager::HEADING,
+				'separator' => 'before',
+			)
+		);
+
+		$this->add_responsive_control(
+			'to_top_size',
+			array(
+				'label'      => __( 'Button size', 'apotheca-glossary' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'px', 'rem' ),
+				'range'      => array( 'px' => array( 'min' => 28, 'max' => 100 ) ),
+				'default'    => array( 'unit' => 'px', 'size' => 46 ),
+				'selectors'  => array( '{{WRAPPER}}' => '--apglos-totop-size: {{SIZE}}{{UNIT}};' ),
+			)
+		);
+
+		$this->add_control(
+			'to_top_radius',
+			array(
+				'label'       => __( 'Corner radius', 'apotheca-glossary' ),
+				'type'        => Controls_Manager::SLIDER,
+				'size_units'  => array( '%', 'px', 'rem' ),
+				'range'       => array(
+					'%'  => array( 'min' => 0, 'max' => 50 ),
+					'px' => array( 'min' => 0, 'max' => 50 ),
+				),
+				'default'     => array( 'unit' => '%', 'size' => 50 ),
+				'selectors'   => array( '{{WRAPPER}}' => '--apglos-totop-radius: {{SIZE}}{{UNIT}};' ),
+				'description' => __( '50% is a circle. Lower it for a rounded square, or 0 for a sharp square.', 'apotheca-glossary' ),
+			)
+		);
+
+		$this->add_control(
+			'to_top_bg',
+			array(
+				'label'     => __( 'Background', 'apotheca-glossary' ),
+				'type'      => Controls_Manager::COLOR,
+				'selectors' => array( '{{WRAPPER}}' => '--apglos-totop-bg: {{VALUE}};' ),
+			)
+		);
+
+		$this->add_control(
+			'to_top_bg_hover',
+			array(
+				'label'     => __( 'Background (hover)', 'apotheca-glossary' ),
+				'type'      => Controls_Manager::COLOR,
+				'selectors' => array( '{{WRAPPER}}' => '--apglos-totop-bg-hover: {{VALUE}};' ),
+			)
+		);
+
+		$this->add_control(
+			'to_top_border_width',
+			array(
+				'label'      => __( 'Border width', 'apotheca-glossary' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'px' ),
+				'range'      => array( 'px' => array( 'min' => 0, 'max' => 10 ) ),
+				'selectors'  => array( '{{WRAPPER}}' => '--apglos-totop-border-width: {{SIZE}}{{UNIT}};' ),
+			)
+		);
+
+		$this->add_control(
+			'to_top_border_color',
+			array(
+				'label'     => __( 'Border colour', 'apotheca-glossary' ),
+				'type'      => Controls_Manager::COLOR,
+				'selectors' => array( '{{WRAPPER}}' => '--apglos-totop-border-color: {{VALUE}};' ),
+				'condition' => array( 'to_top_border_width[size]!' => '' ),
+			)
+		);
+
+		// ---- Icon --------------------------------------------------------
+		$this->add_control(
+			'to_top_icon_heading',
+			array(
+				'label'     => __( 'Icon', 'apotheca-glossary' ),
+				'type'      => Controls_Manager::HEADING,
+				'separator' => 'before',
+			)
+		);
+
+		$this->add_responsive_control(
+			'to_top_icon_size',
+			array(
+				'label'      => __( 'Icon size', 'apotheca-glossary' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'px', 'rem' ),
+				'range'      => array( 'px' => array( 'min' => 10, 'max' => 60 ) ),
+				'default'    => array( 'unit' => 'px', 'size' => 22 ),
+				'selectors'  => array( '{{WRAPPER}}' => '--apglos-totop-icon-size: {{SIZE}}{{UNIT}};' ),
+			)
+		);
+
+		$this->add_control(
+			'to_top_color',
+			array(
+				'label'     => __( 'Icon colour', 'apotheca-glossary' ),
+				'type'      => Controls_Manager::COLOR,
+				'selectors' => array( '{{WRAPPER}}' => '--apglos-totop-color: {{VALUE}};' ),
+			)
+		);
+
+		$this->add_control(
+			'to_top_color_hover',
+			array(
+				'label'     => __( 'Icon colour (hover)', 'apotheca-glossary' ),
+				'type'      => Controls_Manager::COLOR,
+				'selectors' => array( '{{WRAPPER}}' => '--apglos-totop-color-hover: {{VALUE}};' ),
+			)
+		);
+
+		$this->end_controls_section();
+	}
+
 	/*
 	 * -------------------------------------------------------------------------
 	 * Helpers
@@ -1748,12 +1936,14 @@ class Apglos_Glossary_Widget extends Widget_Base {
 			'show_category_label' => $s['show_category_label'],
 			'show_also_known_as'  => $s['show_also_known_as'],
 			'show_related'        => $s['show_related'],
+			'show_to_top'         => isset( $s['show_to_top'] ) ? $s['show_to_top'] : '',
 			'empty_letters'       => ( isset( $s['empty_letters'] ) && 'hide' === $s['empty_letters'] ) ? 'hide' : 'grey',
 			'category'            => isset( $s['category'] ) ? sanitize_title( $s['category'] ) : '',
 			'search_placeholder'  => isset( $s['search_placeholder'] ) ? sanitize_text_field( $s['search_placeholder'] ) : '',
 			'aka_label'           => isset( $s['aka_label'] ) ? sanitize_text_field( $s['aka_label'] ) : '',
 			'related_label'       => isset( $s['related_label'] ) ? sanitize_text_field( $s['related_label'] ) : '',
 			'clear_label'         => isset( $s['clear_label'] ) ? sanitize_text_field( $s['clear_label'] ) : '',
+			'to_top_label'        => isset( $s['to_top_label'] ) ? sanitize_text_field( $s['to_top_label'] ) : '',
 			'empty_message'       => isset( $s['empty_message'] ) ? sanitize_text_field( $s['empty_message'] ) : '',
 		);
 
